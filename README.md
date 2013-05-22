@@ -6,6 +6,7 @@ Requirements
 ------------
 #### cookbooks
 - `application` - application_procfile needs the application cookbook to discover a Procfile.
+- `monit` - application_procfile needs the monit cookbook to configure services under monit.
 
 #### gems
 - `foreman` - application_procfile uses the foreman gem's Procfile parser.
