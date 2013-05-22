@@ -31,6 +31,25 @@ application 'someapp' do
 end
 ```
 
+This will run a default of 1 web and 2 workers for a Procfile that looks like:
+
+```
+web: bundle exec unicorn -c ./config/unicorn.rb
+worker: bundle exec rake resque:work
+```
+
+To restart your workers:
+
+```bash
+touch /var/lock/subsys/someapp/worker.restart
+```
+
+The `reload` option specifies an optional signal that can be sent to processes to gracefully reload them by doing:
+
+```bash
+touch /var/lock/subsys/someapp/web.reload
+```
+
 Contributing
 ------------
 1. Fork the repository on Github
