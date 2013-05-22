@@ -71,6 +71,14 @@ action :before_restart do
     action :create
   end
 
+  directory "/var/log/#{new_resource.name}" do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+    action :create
+  end
+
   # Load application's Procfile
   pf = ::Foreman::Procfile.new(::File.join(new_resource.application.path, 'current', 'Procfile'))
   types = [].tap { |a| pf.entries { |n,c| a << n } }
