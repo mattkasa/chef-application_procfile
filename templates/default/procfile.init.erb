@@ -3,7 +3,7 @@
 [ -e /etc/profile ] && source /etc/profile
 
 PID_FILE=${PID_FILE:-/var/run/<%= @name %>/<%= @type %>.pid}
-LOG_FILE=${LOG_FILE:-/var/log/<%= @name %>/<%= @type %>.pid}
+LOG_FILE=${LOG_FILE:-/var/log/<%= @name %>/<%= @type %>.log}
 
 STATUS_RUNNING=0
 STATUS_DEAD_WITH_PID=1

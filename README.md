@@ -38,6 +38,13 @@ web: bundle exec unicorn -c ./config/unicorn.rb
 worker: bundle exec rake resque:work
 ```
 
+Any output to stderr or stdout from your processes will be logged to files like:
+
+```
+/var/log/someapp/web.log
+/var/log/someapp/worker.log
+```
+
 To restart your workers:
 
 ```bash
