@@ -61,6 +61,7 @@ Contributing
 
 License and Authors
 -------------------
+Author:: Javier Muniz <javier@granicus.com>
 Author:: Matt Kasa <mattk@granicus.com>
 
 Copyright 2013, Granicus Inc.
