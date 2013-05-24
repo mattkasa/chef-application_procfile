@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.1:
+
+* Now explicitly restarts services
+
 ## 0.1.0:
 
 * Initial release of application_procfile
