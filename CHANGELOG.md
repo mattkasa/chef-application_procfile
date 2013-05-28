@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.2:
+
+* Now use reload to restart services for processes supporting zero-downtime deploys
+
 ## 0.1.1:
 
 * Now explicitly restarts services
