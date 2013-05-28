@@ -17,7 +17,9 @@ check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile /var/run/<%= @name %>
 check file <%= @type %>.restart with path /var/lock/subsys/<%= @name %>/<%= @type %>.restart
   if changed timestamp then restart
 
-<% if @options && @options.has_key?(:reload) %>
 check file <%= @type %>.reload with path /var/lock/subsys/<%= @name %>/<%= @type %>.reload
+<% if @options && @options.has_key?(:reload) %>
   if changed timestamp then exec "/bin/bash -c 'kill -s <%= @options[:reload] %> $(cat /var/run/<%= @name %>/<%= @type %>-*.pid)'"
+<% else %>
+  if changed timestamp then restart
 <% end %>

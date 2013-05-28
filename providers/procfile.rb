@@ -37,7 +37,7 @@ action :before_compile do
       execute '/etc/init.d/monit reload' do
         user 'root'
       end
-      execute "touch /var/lock/subsys/#{new_resource.name}/*.restart" do
+      execute "touch /var/lock/subsys/#{new_resource.name}/*.reload" do
         user 'root'
       end
     end
@@ -93,11 +93,10 @@ action :before_restart do
         owner 'root'
         group 'root'
         mode '0644'
-        action :create
+        action :create_if_missing
       end
 
       file "/var/lock/subsys/#{new_resource.name}/#{type}.reload" do
-        only_if { options.size >= 2 && options[1].has_key?(:reload) }
         owner 'root'
         group 'root'
         mode '0644'
