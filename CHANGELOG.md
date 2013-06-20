@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.3:
+
+* Use resource name in restart/reload file names in monit to help avoid naming collisions
+
 ## 0.1.2:
 
 * Now use reload to restart services for processes supporting zero-downtime deploys

@@ -5,19 +5,19 @@
 
 <% @number.times do |i| %>
 check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile /var/run/<%= @name %>/<%= @type %>-<%= i %>.pid
-  depends on <%= @type %>.restart
+  depends on <%= "#{@name}-#{@type}" %>.restart
 <% if @options && @options.has_key?(:reload) %>
-  depends on <%= @type %>.reload
+  depends on <%= "#{@name}-#{@type}" %>.reload
 <% end %>
   start program "/bin/bash -c 'PID_FILE=/var/run/<%= @name %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
   stop program  = "/bin/bash -c 'PID_FILE=/var/run/<%= @name %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> stop'"
   group <%= "#{@name}-#{@type}" %>
 <% end %>
 
-check file <%= @type %>.restart with path /var/lock/subsys/<%= @name %>/<%= @type %>.restart
+check file <%= "#{@name}-#{@type}" %>.restart with path /var/lock/subsys/<%= @name %>/<%= @type %>.restart
   if changed timestamp then restart
 
-check file <%= @type %>.reload with path /var/lock/subsys/<%= @name %>/<%= @type %>.reload
+check file <%= "#{@name}-#{@type}" %>.reload with path /var/lock/subsys/<%= @name %>/<%= @type %>.reload
 <% if @options && @options.has_key?(:reload) %>
   if changed timestamp then exec "/bin/bash -c 'kill -s <%= @options[:reload] %> $(cat /var/run/<%= @name %>/<%= @type %>-*.pid)'"
 <% else %>
