@@ -28,5 +28,5 @@
   "recipes": {
     "procfile": "Installs foreman gem to use for parsing Procfiles"
   },
-  "version": "0.1.3"
+  "version": "0.1.4"
 }

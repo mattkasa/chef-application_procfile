@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.4:
+
+* Use resource name to load node attributes into the environment instead of sourcing /etc/profile
+
 ## 0.1.3:
 
 * Use resource name in restart/reload file names in monit to help avoid naming collisions
