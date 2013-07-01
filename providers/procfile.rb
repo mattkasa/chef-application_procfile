@@ -34,11 +34,9 @@ action :before_compile do
 
   unless new_resource.restart_command
     new_resource.restart_command do
-      execute '/etc/init.d/monit reload' do
-        user 'root'
-      end
       execute "touch /var/lock/subsys/#{new_resource.name}/*.reload" do
         user 'root'
+        notifies :restart, resources(:service => 'monit'), :delayed
       end
     end
   end
