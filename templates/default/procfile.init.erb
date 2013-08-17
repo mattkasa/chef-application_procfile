@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
 <% node[@name.to_sym].each do |k, v| %>
 export <%= k.to_s.upcase %>='<%= v.to_s %>'
 <% end %>
