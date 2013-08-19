@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.5:
+
+* Add delayed restart of monit and force UTF-8 in application environment
+
 ## 0.1.4:
 
 * Use resource name to load node attributes into the environment instead of sourcing /etc/profile
