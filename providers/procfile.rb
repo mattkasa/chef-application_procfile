@@ -137,7 +137,5 @@ action :after_restart do
   execute 'application_procfile_reload' do
     command "touch /var/lock/subsys/#{new_resource.name}/*.reload"
     user 'root'
-    action :nothing
   end
-  notifies :run, 'execute[application_procfile_reload]', :delayed
 end
