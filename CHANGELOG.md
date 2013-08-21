@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.12:
+
+* Fix start syntax and depends on reload in monitrc
+
 ## 0.1.11:
 
 * Remove monit restart
