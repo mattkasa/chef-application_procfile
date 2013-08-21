@@ -30,13 +30,10 @@ end
 include Chef::Mixin::LanguageIncludeRecipe
 
 action :before_compile do
-  include_recipe 'monit'
-
   unless new_resource.restart_command
     new_resource.restart_command do
       execute 'application_procfile_reload' do
         command "touch /var/lock/subsys/#{new_resource.name}/*.reload"
-        user 'root'
       end
     end
   end
@@ -127,7 +124,6 @@ action :before_restart do
           :number => options[0],
           :options => options[1]
         })
-        notifies :restart, resources(:service => 'monit'), :delayed
       end
     else
       Chef::Log.warn("Missing Procfile entry for '#{type}'")
