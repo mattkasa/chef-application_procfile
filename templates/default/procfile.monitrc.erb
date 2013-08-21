@@ -6,10 +6,8 @@
 <% @number.times do |i| %>
 check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile /var/run/<%= @name %>/<%= @type %>-<%= i %>.pid
   depends on <%= "#{@name}-#{@type}" %>.restart
-<% if @options && @options.has_key?(:reload) %>
   depends on <%= "#{@name}-#{@type}" %>.reload
-<% end %>
-  start program "/bin/bash -c 'PID_FILE=/var/run/<%= @name %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
+  start program = "/bin/bash -c 'PID_FILE=/var/run/<%= @name %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
   stop program  = "/bin/bash -c 'PID_FILE=/var/run/<%= @name %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> stop'"
   group <%= "#{@name}-#{@type}" %>
 <% end %>
