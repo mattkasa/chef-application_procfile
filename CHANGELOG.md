@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.10:
+
+* Touch reload files in restart_command and restart monit :delayed
+
 ## 0.1.9:
 
 * Run touch on reload files from after_restart
