@@ -34,7 +34,7 @@ action :before_compile do
 
   unless new_resource.restart_command
     new_resource.restart_command do
-      execute "touch /var/lock/subsys/#{new_resource.name}/*.reload" do
+      execute '/etc/init.d/monit reload' do
         user 'root'
       end
     end
@@ -97,7 +97,7 @@ action :before_restart do
         owner 'root'
         group 'root'
         mode '0644'
-        action :create
+        action :create_if_missing
       end
 
       template 'procfile.init' do
@@ -134,4 +134,10 @@ action :before_restart do
 end
 
 action :after_restart do
+  execute 'application_procfile_reload' do
+    command "touch /var/lock/subsys/#{@new_resource.name}/*.reload"
+    user 'root'
+    action :nothing
+  end
+  notifies :run, 'execute[application_procfile_reload]', :delayed
 end
