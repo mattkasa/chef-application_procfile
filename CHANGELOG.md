@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.8:
+
+* Use local variable for new_resource
+
 ## 0.1.7:
 
 * Reload monit in restart_command and add :delayed touch to reload files
