@@ -40,6 +40,25 @@ action :before_compile do
 end
 
 action :before_deploy do
+  # Load application's Procfile
+  pf = procfile
+  process_types = procfile_types(pf)
+
+  # Go through the process types we know about
+  new_resource.processes.each do |type, options|
+    if process_types.include?(type.to_s)
+      execute "application_procfile_reload_#{type.to_s}" do
+        command "touch #{::File.join(lock_path, "#{new_resource.name}-#{type.to_s}.reload")}"
+        action :nothing
+      end
+      # Create a unicorn.rb if one of the process types we know about is running unicorn
+      if unicorn?(pf[type.to_s])
+        create_unicorn_rb(type.to_s, options[0])
+      end
+    else
+      Chef::Log.warn("Missing Procfile entry for '#{type}'")
+    end
+  end
 end
 
 action :before_migrate do
@@ -53,7 +72,7 @@ action :before_restart do
 
   new_resource = @new_resource
 
-  directory "/var/lock/subsys/#{new_resource.name}" do
+  directory lock_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -61,7 +80,7 @@ action :before_restart do
     action :create
   end
 
-  directory "/var/run/#{new_resource.name}" do
+  directory pid_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -69,7 +88,7 @@ action :before_restart do
     action :create
   end
 
-  directory "/var/log/#{new_resource.name}" do
+  directory log_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -78,20 +97,25 @@ action :before_restart do
   end
 
   # Load application's Procfile
-  pf = ::Foreman::Procfile.new(::File.join(new_resource.application.path, 'current', 'Procfile'))
-  types = [].tap { |a| pf.entries { |n,c| a << n } }
+  pf = procfile
+  process_types = procfile_types(pf)
 
   # Go through the process types we know about
   new_resource.processes.each do |type, options|
-    if types.include?(type.to_s)
-      file "/var/lock/subsys/#{new_resource.name}/#{type}.restart" do
+    if process_types.include?(type.to_s)
+      command = pf[type.to_s]
+      if unicorn?(command)
+        command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
+      end
+
+      file ::File.join(lock_path, "#{type}.restart") do
         owner 'root'
         group 'root'
         mode '0644'
         action :create_if_missing
       end
 
-      file "/var/lock/subsys/#{new_resource.name}/#{type}.reload" do
+      file ::File.join(lock_path, "#{type}.reload") do
         owner 'root'
         group 'root'
         mode '0644'
@@ -100,7 +124,7 @@ action :before_restart do
 
       template 'procfile.init' do
         cookbook 'application_procfile'
-        path "/etc/init.d/#{new_resource.name}-#{type}"
+        path ::File.join('etc', 'init.d', "#{new_resource.name}-#{type}")
         owner 'root'
         group 'root'
         mode '0755'
@@ -108,22 +132,32 @@ action :before_restart do
           :name => new_resource.name,
           :type => type,
           :current_path => ::File.join(new_resource.application.path, 'current'),
-          :command => pf[type.to_s]
+          :pid_path => pid_path,
+          :log_path => log_path,
+          :command => command
         })
+      end
+
+      execute 'application_procfile_monit_reload' do
+        command '/etc/init.d/monit reload'
+        action :nothing
       end
 
       template 'procfile.monitrc' do
         cookbook 'application_procfile'
-        path "/etc/monit/conf.d/#{new_resource.name}-#{type}.conf"
+        path ::File.join('etc', 'monit', 'conf.d', "#{new_resource.name}-#{type}.conf")
         owner 'root'
         group 'root'
         mode '0644'
         variables ({
           :name => new_resource.name,
           :type => type,
-          :number => options[0],
-          :options => options[1]
+          :number => (unicorn?(command) ? 1 : options[0]),
+          :options => options[1],
+          :lock_path => lock_path,
+          :pid_path => pid_path
         })
+        notifies :run, 'execute[application_procfile_monit_reload]', :immediately
       end
     else
       Chef::Log.warn("Missing Procfile entry for '#{type}'")
@@ -132,4 +166,52 @@ action :before_restart do
 end
 
 action :after_restart do
+end
+
+protected
+
+def procfile
+  @procfile ||= ::File.join(new_resource.application.path, 'current', 'Procfile')
+  ::Foreman::Procfile.new(@procfile)
+end
+
+def procfile_types(pf=procfile)
+  [].tap { |a| pf.entries { |n,c| a << n } }
+end
+
+def lock_path
+  @lock_path ||= ::File.join('var', 'lock', 'subsys', new_resource.name)
+end
+
+def pid_path
+  @pid_path ||= ::File.join('var', 'run', new_resource.name)
+end
+
+def log_path
+  @log_path ||= ::File.join('var', 'log', new_resource.name)
+end
+
+def unicorn_rb_path
+  @unicorn_rb_path ||= ::File.join(new_resource.path, 'shared', 'unicorn.rb')
+end
+
+def unicorn?(command)
+  command.to_s.include?('unicorn')
+end
+
+def create_unicorn_rb(process_type='web', workers=1)
+  template unicorn_rb_path do
+    source 'unicorn.rb.erb'
+    cookbook 'application_procfile'
+    owner new_resource.owner
+    group new_resource.group
+    mode '644'
+    variables(
+      :current_path => ::File.join(new_resource.path, 'current'),
+      :pid_file => ::File.join(new_resource.path, 'shared', 'unicorn.pid'),
+      :monit_pid_file => ::File.join(pid_path, "#{process_type}-0.pid"),
+      :workers => workers
+    )
+    notifies :run, "execute[application_procfile_reload_#{process_type}]", :delayed
+  end
 end
