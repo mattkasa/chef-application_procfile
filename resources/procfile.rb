@@ -21,7 +21,7 @@
 # along with application_procfile.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include Chef::Resource::ApplicationBase
+include ApplicationCookbook::ResourceBase
 
 # Handle any process types
 # TODO: restrict these to only the process types in the Procfile

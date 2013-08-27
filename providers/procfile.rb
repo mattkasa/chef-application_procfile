@@ -27,7 +27,7 @@ rescue LoadError
   Chef::Log.warn("Missing gem 'foreman'")
 end
 
-include Chef::Mixin::LanguageIncludeRecipe
+include Chef::DSL::IncludeRecipe
 
 action :before_compile do
   unless new_resource.restart_command
@@ -40,24 +40,14 @@ action :before_compile do
 end
 
 action :before_deploy do
-  # Load application's Procfile
-  pf = procfile
-  process_types = procfile_types(pf)
+  execute "application_procfile_reload_#{type.to_s}" do
+    command "touch #{::File.join(lock_path, "#{new_resource.name}-#{type.to_s}.reload")}"
+    action :nothing
+  end
 
-  # Go through the process types we know about
-  new_resource.processes.each do |type, options|
-    if process_types.include?(type.to_s)
-      execute "application_procfile_reload_#{type.to_s}" do
-        command "touch #{::File.join(lock_path, "#{new_resource.name}-#{type.to_s}.reload")}"
-        action :nothing
-      end
-      # Create a unicorn.rb if one of the process types we know about is running unicorn
-      if unicorn?(pf[type.to_s])
-        create_unicorn_rb(type.to_s, options[0])
-      end
-    else
-      Chef::Log.warn("Missing Procfile entry for '#{type}'")
-    end
+  # Create a unicorn.rb if one of the process types we know about is running unicorn
+  if unicorn?(pf[type.to_s])
+    create_unicorn_rb(type.to_s, options[0])
   end
 end
 
@@ -99,12 +89,14 @@ action :before_restart do
   # Load application's Procfile
   pf = procfile
   process_types = procfile_types(pf)
+  unicorn_installed = false
 
   # Go through the process types we know about
   new_resource.processes.each do |type, options|
     if process_types.include?(type.to_s)
       command = pf[type.to_s]
       if unicorn?(command)
+        unicorn_installed = true
         command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
       end
 
@@ -163,6 +155,10 @@ action :before_restart do
       Chef::Log.warn("Missing Procfile entry for '#{type}'")
     end
   end
+
+  unless unicorn_installed
+    delete_unicorn_rb
+  end
 end
 
 action :after_restart do
@@ -213,5 +209,11 @@ def create_unicorn_rb(process_type='web', workers=1)
       :workers => workers
     )
     notifies :run, "execute[application_procfile_reload_#{process_type}]", :delayed
+  end
+end
+
+def delete_unicorn_rb
+  file unicorn_rb_path do
+    action :delete
   end
 end
