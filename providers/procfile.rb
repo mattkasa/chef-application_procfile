@@ -40,15 +40,12 @@ action :before_compile do
 end
 
 action :before_deploy do
-  execute "application_procfile_reload_#{type.to_s}" do
-    command "touch #{::File.join(lock_path, "#{new_resource.name}-#{type.to_s}.reload")}"
+  execute "application_procfile_reload_web" do
+    command "touch #{::File.join(lock_path, "#{new_resource.name}-web.reload")}"
     action :nothing
   end
 
-  # Create a unicorn.rb if one of the process types we know about is running unicorn
-  if unicorn?(pf[type.to_s])
-    create_unicorn_rb(type.to_s, options[0])
-  end
+  create_unicorn_rb(options[0])
 end
 
 action :before_migrate do
@@ -195,7 +192,7 @@ def unicorn?(command)
   command.to_s.include?('unicorn')
 end
 
-def create_unicorn_rb(process_type='web', workers=1)
+def create_unicorn_rb(workers=1)
   template unicorn_rb_path do
     source 'unicorn.rb.erb'
     cookbook 'application_procfile'
@@ -205,10 +202,10 @@ def create_unicorn_rb(process_type='web', workers=1)
     variables(
       :current_path => ::File.join(new_resource.path, 'current'),
       :pid_file => ::File.join(new_resource.path, 'shared', 'unicorn.pid'),
-      :monit_pid_file => ::File.join(pid_path, "#{process_type}-0.pid"),
+      :monit_pid_file => ::File.join(pid_path, 'web-0.pid'),
       :workers => workers
     )
-    notifies :run, "execute[application_procfile_reload_#{process_type}]", :delayed
+    notifies :run, 'execute[application_procfile_reload_web]', :delayed
   end
 end
 
