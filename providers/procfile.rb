@@ -127,7 +127,7 @@ action :before_restart do
 
       template 'procfile.init' do
         cookbook 'application_procfile'
-        path ::File.join('etc', 'init.d', "#{new_resource.name}-#{type}")
+        path ::File.join('/etc', 'init.d', "#{new_resource.name}-#{type}")
         owner 'root'
         group 'root'
         mode '0755'
@@ -148,7 +148,7 @@ action :before_restart do
 
       template 'procfile.monitrc' do
         cookbook 'application_procfile'
-        path ::File.join('etc', 'monit', 'conf.d', "#{new_resource.name}-#{type}.conf")
+        path ::File.join('/etc', 'monit', 'conf.d', "#{new_resource.name}-#{type}.conf")
         owner 'root'
         group 'root'
         mode '0644'
@@ -178,15 +178,15 @@ def procfile_path
 end
 
 def lock_path
-  @lock_path ||= ::File.join('var', 'lock', 'subsys', new_resource.name)
+  @lock_path ||= ::File.join('/var', 'lock', 'subsys', new_resource.name)
 end
 
 def pid_path
-  @pid_path ||= ::File.join('var', 'run', new_resource.name)
+  @pid_path ||= ::File.join('/var', 'run', new_resource.name)
 end
 
 def log_path
-  @log_path ||= ::File.join('var', 'log', new_resource.name)
+  @log_path ||= ::File.join('/var', 'log', new_resource.name)
 end
 
 def unicorn_rb_path
