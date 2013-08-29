@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.16:
+
+* Write unicorn.rb from both before_deploy and before_restart to correct issues with Procfile not being available
+
 ## 0.1.15:
 
 * Assume process type web for unicorn
