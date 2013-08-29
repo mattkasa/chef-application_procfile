@@ -40,12 +40,27 @@ action :before_compile do
 end
 
 action :before_deploy do
-  execute "application_procfile_reload_web" do
-    command "touch #{::File.join(lock_path, "#{new_resource.name}-web.reload")}"
-    action :nothing
-  end
+  if ::File.exists?(unicorn_rb_path) && ::File.exists?(procfile_path)
+    # Load application's Procfile
+    pf = procfile
+    process_types = procfile_types(pf)
 
-  create_unicorn_rb(options[0])
+    # Go through the process types we know about
+    new_resource.processes.each do |type, options|
+      if process_types.include?(type.to_s)
+        execute "application_procfile_reload_#{type.to_s}" do
+          command "touch #{::File.join(lock_path, "#{new_resource.name}#{type.to_s}.reload")}"
+          action :nothing
+        end
+        # Create a unicorn.rb if one of the process types we know about is running unicorn
+        if unicorn?(pf[type.to_s])
+          create_unicorn_rb(type.to_s, options[0])
+        end
+      else
+        Chef::Log.warn("Missing Procfile entry for '#{type}'")
+      end
+    end
+  end
 end
 
 action :before_migrate do
@@ -86,15 +101,14 @@ action :before_restart do
   # Load application's Procfile
   pf = procfile
   process_types = procfile_types(pf)
-  unicorn_installed = false
 
   # Go through the process types we know about
   new_resource.processes.each do |type, options|
     if process_types.include?(type.to_s)
       command = pf[type.to_s]
       if unicorn?(command)
-        unicorn_installed = true
         command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
+        create_unicorn_rb(type.to_s, options[0])
       end
 
       file ::File.join(lock_path, "#{type}.restart") do
@@ -152,10 +166,6 @@ action :before_restart do
       Chef::Log.warn("Missing Procfile entry for '#{type}'")
     end
   end
-
-  unless unicorn_installed
-    delete_unicorn_rb
-  end
 end
 
 action :after_restart do
@@ -163,13 +173,8 @@ end
 
 protected
 
-def procfile
-  @procfile ||= ::File.join(new_resource.application.path, 'current', 'Procfile')
-  ::Foreman::Procfile.new(@procfile)
-end
-
-def procfile_types(pf=procfile)
-  [].tap { |a| pf.entries { |n,c| a << n } }
+def procfile_path
+  @procfile_path ||= ::File.join(new_resource.application.path, 'current', 'Procfile')
 end
 
 def lock_path
@@ -188,11 +193,19 @@ def unicorn_rb_path
   @unicorn_rb_path ||= ::File.join(new_resource.path, 'shared', 'unicorn.rb')
 end
 
+def procfile
+  ::Foreman::Procfile.new(procfile_path)
+end
+
+def procfile_types(pf=procfile)
+  [].tap { |a| pf.entries { |n,c| a << n } }
+end
+
 def unicorn?(command)
   command.to_s.include?('unicorn')
 end
 
-def create_unicorn_rb(workers=1)
+def create_unicorn_rb(process_type='web', workers=1)
   template unicorn_rb_path do
     source 'unicorn.rb.erb'
     cookbook 'application_procfile'
@@ -202,15 +215,9 @@ def create_unicorn_rb(workers=1)
     variables(
       :current_path => ::File.join(new_resource.path, 'current'),
       :pid_file => ::File.join(new_resource.path, 'shared', 'unicorn.pid'),
-      :monit_pid_file => ::File.join(pid_path, 'web-0.pid'),
+      :monit_pid_file => ::File.join(pid_path, "#{process_type}-0.pid"),
       :workers => workers
     )
-    notifies :run, 'execute[application_procfile_reload_web]', :delayed
-  end
-end
-
-def delete_unicorn_rb
-  file unicorn_rb_path do
-    action :delete
+    notifies :run, "execute[application_procfile_reload_#{process_type}]", :delayed
   end
 end
