@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.15:
+
+* Assume process type web for unicorn
+
 ## 0.1.14:
 
 * Upgrade for application >= 3.0.0 and fix unicorn.rb creation in before_deploy
