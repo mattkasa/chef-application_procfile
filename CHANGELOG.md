@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.19:
+
+* Export node attributes from node[:application_name][:env]
+
 ## 0.1.18:
 
 * Fix paths in monitrc
