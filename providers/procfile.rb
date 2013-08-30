@@ -40,6 +40,16 @@ action :before_compile do
 end
 
 action :before_deploy do
+  if node[new_resource.name.to_sym].has_key?(:env)
+    node[new_resource.name.to_sym][:env].each do |k,v|
+      ENV[k.to_s.upcase] = v.to_s
+    end
+  else
+    node[new_resource.name.to_sym].each do |k,v|
+      ENV[k.to_s.upcase] = v.to_s
+    end
+  end
+
   if ::File.exists?(unicorn_rb_path) && ::File.exists?(procfile_path)
     # Load application's Procfile
     pf = procfile
