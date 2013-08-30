@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.18:
+
+* Fix paths in monitrc
+
 ## 0.1.17:
 
 * Fix absolute paths
