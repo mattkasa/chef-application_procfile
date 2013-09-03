@@ -67,8 +67,8 @@ action :before_deploy do
           only_if do unicorn?(pf[type.to_s]) end
           source 'unicorn.rb.erb'
           cookbook 'application_procfile'
-          owner new_resource.owner
-          group new_resource.group
+          owner 'root'
+          group 'root'
           mode '644'
           variables(
             :current_path => ::File.join(new_resource.path, 'current'),
@@ -133,8 +133,8 @@ action :before_restart do
         template unicorn_rb_path do
           source 'unicorn.rb.erb'
           cookbook 'application_procfile'
-          owner new_resource.owner
-          group new_resource.group
+          owner 'root'
+          group 'root'
           mode '644'
           variables(
             :current_path => ::File.join(new_resource.path, 'current'),
