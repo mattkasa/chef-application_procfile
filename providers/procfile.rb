@@ -130,6 +130,10 @@ action :before_restart do
       command = pf[type.to_s]
       if unicorn?(command)
         command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
+        execute "application_procfile_reload_#{type.to_s}" do
+          command "touch #{::File.join(lock_path, "#{new_resource.name}#{type.to_s}.reload")}"
+          action :nothing
+        end
         template unicorn_rb_path do
           source 'unicorn.rb.erb'
           cookbook 'application_procfile'

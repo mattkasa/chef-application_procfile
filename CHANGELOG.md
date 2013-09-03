@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.22:
+
+* Add unicorn reload block to before_restart
+
 ## 0.1.21:
 
 * Use static owner/group for unicorn.rb template
