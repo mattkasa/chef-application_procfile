@@ -63,8 +63,20 @@ action :before_deploy do
           action :nothing
         end
         # Create a unicorn.rb if one of the process types we know about is running unicorn
-        if unicorn?(pf[type.to_s])
-          create_unicorn_rb(type.to_s, options[0])
+        template unicorn_rb_path do
+          only_if do unicorn?(pf[type.to_s]) end
+          source 'unicorn.rb.erb'
+          cookbook 'application_procfile'
+          owner new_resource.owner
+          group new_resource.group
+          mode '644'
+          variables(
+            :current_path => ::File.join(new_resource.path, 'current'),
+            :pid_file => ::File.join(new_resource.path, 'shared', 'unicorn.pid'),
+            :monit_pid_file => ::File.join(pid_path, "#{type.to_s}-0.pid"),
+            :workers => options[0]
+          )
+          notifies :run, "execute[application_procfile_reload_#{type.to_s}]", :delayed
         end
       else
         Chef::Log.warn("Missing Procfile entry for '#{type}'")
@@ -118,7 +130,20 @@ action :before_restart do
       command = pf[type.to_s]
       if unicorn?(command)
         command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
-        create_unicorn_rb(type.to_s, options[0])
+        template unicorn_rb_path do
+          source 'unicorn.rb.erb'
+          cookbook 'application_procfile'
+          owner new_resource.owner
+          group new_resource.group
+          mode '644'
+          variables(
+            :current_path => ::File.join(new_resource.path, 'current'),
+            :pid_file => ::File.join(new_resource.path, 'shared', 'unicorn.pid'),
+            :monit_pid_file => ::File.join(pid_path, "#{type.to_s}-0.pid"),
+            :workers => options[0]
+          )
+          notifies :run, "execute[application_procfile_reload_#{type.to_s}]", :delayed
+        end
       end
 
       file ::File.join(lock_path, "#{type}.restart") do
@@ -213,21 +238,4 @@ end
 
 def unicorn?(command)
   command.to_s.include?('unicorn')
-end
-
-def create_unicorn_rb(process_type='web', workers=1)
-  template unicorn_rb_path do
-    source 'unicorn.rb.erb'
-    cookbook 'application_procfile'
-    owner new_resource.owner
-    group new_resource.group
-    mode '644'
-    variables(
-      :current_path => ::File.join(new_resource.path, 'current'),
-      :pid_file => ::File.join(new_resource.path, 'shared', 'unicorn.pid'),
-      :monit_pid_file => ::File.join(pid_path, "#{process_type}-0.pid"),
-      :workers => workers
-    )
-    notifies :run, "execute[application_procfile_reload_#{process_type}]", :delayed
-  end
 end
