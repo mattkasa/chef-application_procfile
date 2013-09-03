@@ -191,8 +191,8 @@ def create_unicorn_rb(type='web', workers=1)
   end
 end
 
-def create_lock_file(type, action)
-  file ::File.join(lock_path, "#{type}.#{action}") do
+def create_lock_file(type, suffix)
+  file ::File.join(lock_path, "#{type}.#{suffix}") do
     owner 'root'
     group 'root'
     mode '0644'

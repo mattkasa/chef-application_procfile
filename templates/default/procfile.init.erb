@@ -13,10 +13,6 @@ export <%= k.to_s.upcase %>='<%= v.to_s %>'
   <% end %>
 <% end %>
 
-<% node[@name.to_sym].each do |k, v| %>
-export <%= k.to_s.upcase %>='<%= v.to_s %>'
-<% end %>
-
 PID_FILE=${PID_FILE:-<%= @pid_path %>/<%= @type %>.pid}
 LOG_FILE=${LOG_FILE:-<%= @log_path %>/<%= @type %>.log}
 

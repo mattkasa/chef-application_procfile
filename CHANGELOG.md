@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.27:
+
+* Fix bug in create_lock_file and remove duplicate exports from initscripts
+
 ## 0.1.26:
 
 * Update initscripts and monit configs from before_deploy
