@@ -50,7 +50,7 @@ action :before_deploy do
     end
   end
 
-  if ::File.exists?(unicorn_rb_path) && ::File.exists?(procfile_path)
+  if ::File.exists?(procfile_path)
     # Load application's Procfile
     pf = procfile
     process_types = procfile_types(pf)
@@ -58,26 +58,16 @@ action :before_deploy do
     # Go through the process types we know about
     new_resource.processes.each do |type, options|
       if process_types.include?(type.to_s)
-        execute "application_procfile_reload_#{type.to_s}" do
-          command "touch #{::File.join(lock_path, "#{type.to_s}.reload")}"
-          action :nothing
+        command = pf[type.to_s]
+        if unicorn?(command)
+          command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
+          create_unicorn_rb(type.to_s, options[0])
         end
-        # Create a unicorn.rb if one of the process types we know about is running unicorn
-        template unicorn_rb_path do
-          only_if do unicorn?(pf[type.to_s]) end
-          source 'unicorn.rb.erb'
-          cookbook 'application_procfile'
-          owner 'root'
-          group 'root'
-          mode '644'
-          variables(
-            :current_path => ::File.join(new_resource.application.path, 'current'),
-            :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
-            :monit_pid_file => ::File.join(pid_path, "#{type.to_s}-0.pid"),
-            :workers => options[0]
-          )
-          notifies :run, "execute[application_procfile_reload_#{type.to_s}]", :delayed
-        end
+
+        create_lock_file(type.to_s, 'restart')
+        create_lock_file(type.to_s, 'reload')
+        create_initscript(type.to_s, command)
+        create_monitrc(type.to_s, (unicorn?(command) ? 1 : options[0]), options[1])
       else
         Chef::Log.warn("Missing Procfile entry for '#{type}'")
       end
@@ -130,77 +120,13 @@ action :before_restart do
       command = pf[type.to_s]
       if unicorn?(command)
         command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
-        execute "application_procfile_reload_#{type.to_s}" do
-          command "touch #{::File.join(lock_path, "#{type.to_s}.reload")}"
-          action :nothing
-        end
-        template unicorn_rb_path do
-          source 'unicorn.rb.erb'
-          cookbook 'application_procfile'
-          owner 'root'
-          group 'root'
-          mode '644'
-          variables(
-            :current_path => ::File.join(new_resource.application.path, 'current'),
-            :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
-            :monit_pid_file => ::File.join(pid_path, "#{type.to_s}-0.pid"),
-            :workers => options[0]
-          )
-          notifies :run, "execute[application_procfile_reload_#{type.to_s}]", :delayed
-        end
+        create_unicorn_rb(type.to_s, options[0])
       end
 
-      file ::File.join(lock_path, "#{type}.restart") do
-        owner 'root'
-        group 'root'
-        mode '0644'
-        action :create_if_missing
-      end
-
-      file ::File.join(lock_path, "#{type}.reload") do
-        owner 'root'
-        group 'root'
-        mode '0644'
-        action :create_if_missing
-      end
-
-      template 'procfile.init' do
-        cookbook 'application_procfile'
-        path ::File.join('/etc', 'init.d', "#{new_resource.name}-#{type}")
-        owner 'root'
-        group 'root'
-        mode '0755'
-        variables ({
-          :name => new_resource.name,
-          :type => type,
-          :current_path => ::File.join(new_resource.application.path, 'current'),
-          :pid_path => pid_path,
-          :log_path => log_path,
-          :command => command
-        })
-      end
-
-      execute 'application_procfile_monit_reload' do
-        command '/etc/init.d/monit reload'
-        action :nothing
-      end
-
-      template 'procfile.monitrc' do
-        cookbook 'application_procfile'
-        path ::File.join('/etc', 'monit', 'conf.d', "#{new_resource.name}-#{type}.conf")
-        owner 'root'
-        group 'root'
-        mode '0644'
-        variables ({
-          :name => new_resource.name,
-          :type => type,
-          :number => (unicorn?(command) ? 1 : options[0]),
-          :options => options[1],
-          :lock_path => lock_path,
-          :pid_path => pid_path
-        })
-        notifies :run, 'execute[application_procfile_monit_reload]', :immediately
-      end
+      create_lock_file(type.to_s, 'restart')
+      create_lock_file(type.to_s, 'reload')
+      create_initscript(type.to_s, command)
+      create_monitrc(type.to_s, (unicorn?(command) ? 1 : options[0]), options[1])
     else
       Chef::Log.warn("Missing Procfile entry for '#{type}'")
     end
@@ -242,4 +168,76 @@ end
 
 def unicorn?(command)
   command.to_s.include?('unicorn')
+end
+
+def create_unicorn_rb(type='web', workers=1)
+  execute "application_procfile_reload_#{type}" do
+    command "touch #{::File.join(lock_path, "#{type}.reload")}"
+    action :nothing
+  end
+  template unicorn_rb_path do
+    source 'unicorn.rb.erb'
+    cookbook 'application_procfile'
+    owner 'root'
+    group 'root'
+    mode '644'
+    variables(
+      :current_path => ::File.join(new_resource.application.path, 'current'),
+      :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
+      :monit_pid_file => ::File.join(pid_path, "#{type}-0.pid"),
+      :workers => workers
+    )
+    notifies :run, "execute[application_procfile_reload_#{type}]", :delayed
+  end
+end
+
+def create_lock_file(type, action)
+  file ::File.join(lock_path, "#{type}.#{action}") do
+    owner 'root'
+    group 'root'
+    mode '0644'
+    action :create_if_missing
+  end
+end
+
+def create_initscript(type, command)
+  template 'procfile.init' do
+    cookbook 'application_procfile'
+    path ::File.join('/etc', 'init.d', "#{new_resource.name}-#{type}")
+    owner 'root'
+    group 'root'
+    mode '0755'
+    variables ({
+      :name => new_resource.name,
+      :type => type,
+      :current_path => ::File.join(new_resource.application.path, 'current'),
+      :pid_path => pid_path,
+      :log_path => log_path,
+      :command => command
+    })
+  end
+end
+
+def create_monitrc(type, number, options)
+  execute 'application_procfile_monit_reload' do
+    command '/etc/init.d/monit reload'
+    action :nothing
+  end
+
+  template 'procfile.monitrc' do
+    cookbook 'application_procfile'
+    path ::File.join('/etc', 'monit', 'conf.d', "#{new_resource.name}-#{type}.conf")
+    owner 'root'
+    group 'root'
+    mode '0644'
+    variables ({
+      :name => new_resource.name,
+      :type => type,
+      :number => number,
+      :options => options,
+      :lock_path => lock_path,
+      :pid_path => pid_path
+    })
+    notifies :run, 'execute[application_procfile_monit_reload]', :immediately
+  end
 end

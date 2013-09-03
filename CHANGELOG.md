@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.26:
+
+* Update initscripts and monit configs from before_deploy
+
 ## 0.1.25:
 
 * Fix unicorn reload path and monitrc paths
