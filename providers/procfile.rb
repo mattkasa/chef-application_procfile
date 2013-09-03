@@ -59,7 +59,7 @@ action :before_deploy do
     new_resource.processes.each do |type, options|
       if process_types.include?(type.to_s)
         execute "application_procfile_reload_#{type.to_s}" do
-          command "touch #{::File.join(lock_path, "#{new_resource.name}#{type.to_s}.reload")}"
+          command "touch #{::File.join(lock_path, "#{type.to_s}.reload")}"
           action :nothing
         end
         # Create a unicorn.rb if one of the process types we know about is running unicorn
@@ -131,7 +131,7 @@ action :before_restart do
       if unicorn?(command)
         command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
         execute "application_procfile_reload_#{type.to_s}" do
-          command "touch #{::File.join(lock_path, "#{new_resource.name}#{type.to_s}.reload")}"
+          command "touch #{::File.join(lock_path, "#{type.to_s}.reload")}"
           action :nothing
         end
         template unicorn_rb_path do
