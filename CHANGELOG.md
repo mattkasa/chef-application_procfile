@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.20:
+
+* Put static template block in before_restart and before_deploy
+
 ## 0.1.19:
 
 * Export node attributes from node[:application_name][:env]
