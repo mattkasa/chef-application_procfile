@@ -71,8 +71,8 @@ action :before_deploy do
           group 'root'
           mode '644'
           variables(
-            :current_path => ::File.join(new_resource.path, 'current'),
-            :pid_file => ::File.join(new_resource.path, 'shared', 'unicorn.pid'),
+            :current_path => ::File.join(new_resource.application.path, 'current'),
+            :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
             :monit_pid_file => ::File.join(pid_path, "#{type.to_s}-0.pid"),
             :workers => options[0]
           )
@@ -141,8 +141,8 @@ action :before_restart do
           group 'root'
           mode '644'
           variables(
-            :current_path => ::File.join(new_resource.path, 'current'),
-            :pid_file => ::File.join(new_resource.path, 'shared', 'unicorn.pid'),
+            :current_path => ::File.join(new_resource.application.path, 'current'),
+            :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
             :monit_pid_file => ::File.join(pid_path, "#{type.to_s}-0.pid"),
             :workers => options[0]
           )
