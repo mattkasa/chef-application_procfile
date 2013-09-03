@@ -1,4 +1,4 @@
-require File.expand_path('<%= @current_path %>', 'config', 'unicorn.rb')
+require File.join('<%= @current_path %>', 'config', 'unicorn.rb')
 
 working_directory '<%= @current_path %>'
 pid '<%= @pid_file %>'
