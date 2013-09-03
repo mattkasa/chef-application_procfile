@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.24:
+
+* Fix unicorn.rb application path
+
 ## 0.1.23:
 
 * Fix application paths

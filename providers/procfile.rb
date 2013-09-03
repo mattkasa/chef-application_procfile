@@ -229,7 +229,7 @@ def log_path
 end
 
 def unicorn_rb_path
-  @unicorn_rb_path ||= ::File.join(new_resource.path, 'shared', 'unicorn.rb')
+  @unicorn_rb_path ||= ::File.join(new_resource.application.path, 'shared', 'unicorn.rb')
 end
 
 def procfile
