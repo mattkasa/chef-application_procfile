@@ -1,4 +1,5 @@
-require '<%= ::File.join(@current_path, 'config', 'unicorn.rb') %>'
+config_file = '<%= ::File.join(@current_path, 'config', 'unicorn.rb') %>'
+instance_eval(File.read(config_file), config_file)
 
 working_directory '<%= @current_path %>'
 pid '<%= @pid_file %>'

@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.30:
+
+* Use instance_eval instead of require for unicorn.rb
+
 ## 0.1.29:
 
 * Write static require path for unicorn.rb
