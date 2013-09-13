@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.32:
+
+* Add path to shared/unicorn.rb even if -c/--config-file is missing, otherwise preserve old value in shared/unicorn.rb
+
 ## 0.1.31:
 
 * Only load unicorn.rb if it exists (this might be important)
