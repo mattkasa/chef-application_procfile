@@ -62,7 +62,7 @@ action :before_deploy do
         if unicorn?(command)
           if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
             app_unicorn_rb_path = $1
-            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "#{$1} #{unicorn_rb_path}")
+            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{unicorn_rb_path}")
             create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
           else
             command.gsub!(/(unicorn\s+)/, "\\1-c #{unicorn_rb_path} ")
@@ -127,7 +127,7 @@ action :before_restart do
       if unicorn?(command)
         if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
           app_unicorn_rb_path = $1
-          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "#{$1} #{unicorn_rb_path}")
+          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{unicorn_rb_path}")
           create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
         else
           command.gsub!(/(unicorn\s+)/, "\\1-c #{unicorn_rb_path} ")
