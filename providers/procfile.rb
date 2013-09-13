@@ -65,7 +65,7 @@ action :before_deploy do
             command.gsub!(/(-c|--config-file) [^[:space:]]+/, "#{$1} #{unicorn_rb_path}")
             create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
           else
-            command.gsub!(/(unicorn\s+)/, "#{$1}-c #{unicorn_rb_path} ")
+            command.gsub!(/(unicorn\s+)/, "\\1-c #{unicorn_rb_path} ")
             create_unicorn_rb(type.to_s, options[0])
           end
         end
@@ -130,7 +130,7 @@ action :before_restart do
           command.gsub!(/(-c|--config-file) [^[:space:]]+/, "#{$1} #{unicorn_rb_path}")
           create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
         else
-          command.gsub!(/(unicorn\s+)/, "#{$1}-c #{unicorn_rb_path} ")
+          command.gsub!(/(unicorn\s+)/, "\\1-c #{unicorn_rb_path} ")
           create_unicorn_rb(type.to_s, options[0])
         end
       end
