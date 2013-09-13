@@ -60,8 +60,14 @@ action :before_deploy do
       if process_types.include?(type.to_s)
         command = pf[type.to_s]
         if unicorn?(command)
-          command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
-          create_unicorn_rb(type.to_s, options[0])
+          if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
+            app_unicorn_rb_path = $1
+            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "#{$1} #{unicorn_rb_path}")
+            create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
+          else
+            command.gsub!(/(unicorn\s+)/, "#{$1}-c #{unicorn_rb_path} ")
+            create_unicorn_rb(type.to_s, options[0])
+          end
         end
 
         create_lock_file(type.to_s, 'restart')
@@ -119,8 +125,14 @@ action :before_restart do
     if process_types.include?(type.to_s)
       command = pf[type.to_s]
       if unicorn?(command)
-        command.gsub!(/-c [^[:space:]]+/, "-c #{unicorn_rb_path}")
-        create_unicorn_rb(type.to_s, options[0])
+        if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
+          app_unicorn_rb_path = $1
+          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "#{$1} #{unicorn_rb_path}")
+          create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
+        else
+          command.gsub!(/(unicorn\s+)/, "#{$1}-c #{unicorn_rb_path} ")
+          create_unicorn_rb(type.to_s, options[0])
+        end
       end
 
       create_lock_file(type.to_s, 'restart')
@@ -170,7 +182,7 @@ def unicorn?(command)
   command.to_s.include?('unicorn')
 end
 
-def create_unicorn_rb(type='web', workers=1)
+def create_unicorn_rb(type='web', workers=1, app_unicorn_rb_path="#{::File.join(new_resource.application.path, 'current', 'config', 'unicorn.rb')}")
   execute "application_procfile_reload_#{type}" do
     command "touch #{::File.join(lock_path, "#{type}.reload")}"
     action :nothing
@@ -183,6 +195,7 @@ def create_unicorn_rb(type='web', workers=1)
     mode '644'
     variables(
       :current_path => ::File.join(new_resource.application.path, 'current'),
+      :app_unicorn_rb_path => app_unicorn_rb_path,
       :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
       :monit_pid_file => ::File.join(pid_path, "#{type}-0.pid"),
       :workers => workers
