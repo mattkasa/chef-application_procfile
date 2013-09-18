@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source '<%= @env_file %>'
+source '<%= @env_path %>'
 
 PID_FILE=${PID_FILE:-<%= @pid_path %>/<%= @type %>.pid}
 LOG_FILE=${LOG_FILE:-<%= @log_path %>/<%= @type %>.log}
