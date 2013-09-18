@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.36:
+
+* Fix env_path
+
 ## 0.1.35:
 
 * Add support for reloading the environment
