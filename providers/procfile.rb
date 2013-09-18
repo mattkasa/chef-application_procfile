@@ -221,6 +221,10 @@ def create_lock_file(type, suffix)
 end
 
 def create_environment_sh
+  execute "application_procfile_reload" do
+    command "touch #{::File.join(lock_path, '*.reload')}"
+    action :nothing
+  end
   template environment_sh_path do
     source 'environment.sh.erb'
     cookbook 'application_procfile'
@@ -230,6 +234,7 @@ def create_environment_sh
     variables ({
       :name => new_resource.name
     })
+    notifies :run, "execute[application_procfile_reload]", :delayed
   end
 end
 
