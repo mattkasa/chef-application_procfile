@@ -1,17 +1,6 @@
 #!/bin/bash
 
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-export LANGUAGE=en_US.UTF-8
-<% if node[@name.to_sym].has_key?(:env) %>
-  <% node[@name.to_sym][:env].each do |k,v| %>
-export <%= k.to_s.upcase %>='<%= v.to_s %>'
-  <% end %>
-<% else %>
-  <% node[@name.to_sym].each do |k,v| %>
-export <%= k.to_s.upcase %>='<%= v.to_s %>'
-  <% end %>
-<% end %>
+source '<%= @env_file %>'
 
 PID_FILE=${PID_FILE:-<%= @pid_path %>/<%= @type %>.pid}
 LOG_FILE=${LOG_FILE:-<%= @log_path %>/<%= @type %>.log}

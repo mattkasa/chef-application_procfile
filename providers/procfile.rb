@@ -72,6 +72,7 @@ action :before_deploy do
 
         create_lock_file(type.to_s, 'restart')
         create_lock_file(type.to_s, 'reload')
+        create_environment_sh
         create_initscript(type.to_s, command)
         create_monitrc(type.to_s, (unicorn?(command) ? 1 : options[0]), options[1])
       else
@@ -137,6 +138,7 @@ action :before_restart do
 
       create_lock_file(type.to_s, 'restart')
       create_lock_file(type.to_s, 'reload')
+      create_environment_sh
       create_initscript(type.to_s, command)
       create_monitrc(type.to_s, (unicorn?(command) ? 1 : options[0]), options[1])
     else
@@ -149,6 +151,10 @@ action :after_restart do
 end
 
 protected
+
+def environment_sh_path
+  @environment_sh_path ||= ::File.join(new_resource.application.path, 'shared', 'environment.sh')
+end
 
 def procfile_path
   @procfile_path ||= ::File.join(new_resource.application.path, 'current', 'Procfile')
@@ -195,6 +201,7 @@ def create_unicorn_rb(type='web', workers=1, app_unicorn_rb_path="#{::File.join(
     mode '644'
     variables(
       :current_path => ::File.join(new_resource.application.path, 'current'),
+      :env_path => environment_sh_path,
       :app_unicorn_rb_path => app_unicorn_rb_path,
       :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
       :monit_pid_file => ::File.join(pid_path, "#{type}-0.pid"),
@@ -213,6 +220,19 @@ def create_lock_file(type, suffix)
   end
 end
 
+def create_environment_sh
+  template environment_sh_path do
+    source 'environment.sh.erb'
+    cookbook 'application_procfile'
+    owner 'root'
+    group 'root'
+    mode '0755'
+    variables ({
+      :name => new_resource.name
+    })
+  end
+end
+
 def create_initscript(type, command)
   template 'procfile.init' do
     cookbook 'application_procfile'
@@ -223,6 +243,7 @@ def create_initscript(type, command)
     variables ({
       :name => new_resource.name,
       :type => type,
+      :env_path => environment_sh_path,
       :current_path => ::File.join(new_resource.application.path, 'current'),
       :pid_path => pid_path,
       :log_path => log_path,

@@ -1,3 +1,4 @@
+env_file = '<%= @env_path %>'
 config_file = '<%= @app_unicorn_rb_path %>'
 instance_eval(File.read(config_file), config_file) if File.exists?(config_file)
 
@@ -8,8 +9,8 @@ preload_app true
 timeout 60
 worker_processes <%= @workers %>
 
-# Support zero-downtime deploys
 before_fork do |server, worker|
+  # Support zero-downtime deploys
   File.open('<%= @monit_pid_file %>', 'w') { |f| f.write("#{File.read(server.pid).to_i}\n") }
   old_pid = "#{server.config[:pid]}.oldbin"
   if File.exists?(old_pid) && server.pid != old_pid
@@ -17,5 +18,10 @@ before_fork do |server, worker|
       Process.kill('QUIT', File.read(old_pid).to_i)
     rescue Errno::ENOENT, Errno::ESRCH
     end
+  end
+
+  # Support reloading the environment
+  if File.exists?(env_file)
+    ENV.update(Hash[*File.read(env_file).gsub(/^(?:#.*|\s*)$/, '').gsub(/(?:^\n*|\n*$)/, '').gsub(/^export ([^=]+)=["']?(.*?)["']?$/, "\\1\n\\2").split(/\n/)])
   end
 end
