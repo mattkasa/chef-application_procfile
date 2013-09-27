@@ -40,15 +40,7 @@ action :before_compile do
 end
 
 action :before_deploy do
-  if node[new_resource.name.to_sym].has_key?(:env)
-    node[new_resource.name.to_sym][:env].each do |k,v|
-      ENV[k.to_s.upcase] = v.to_s
-    end
-  else
-    node[new_resource.name.to_sym].each do |k,v|
-      ENV[k.to_s.upcase] = v.to_s
-    end
-  end
+  ENV.update(environment_attributes)
 
   if ::File.exists?(procfile_path)
     # Load application's Procfile
@@ -184,6 +176,11 @@ def procfile_types(pf=procfile)
   [].tap { |a| pf.entries { |n,c| a << n } }
 end
 
+def environment_attributes
+  mash = (m = node[new_resource.name.to_sym] and m.has_key?(:env) ? m[:env] : m)
+  mash.inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
+end
+
 def unicorn?(command)
   command.to_s.include?('unicorn')
 end
@@ -232,7 +229,7 @@ def create_environment_sh
     group 'root'
     mode '0755'
     variables ({
-      :name => new_resource.name
+      :environment_attributes => environment_attributes
     })
     notifies :run, "execute[application_procfile_reload]", :delayed
   end
