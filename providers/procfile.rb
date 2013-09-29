@@ -229,6 +229,7 @@ def create_environment_sh
     group 'root'
     mode '0755'
     variables ({
+      :path => new_resource.environment['PATH'],
       :environment_attributes => environment_attributes
     })
     notifies :run, "execute[application_procfile_reload]", :delayed
