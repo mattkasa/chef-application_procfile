@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.39:
+
+* Use PATH from application environment
+
 ## 0.1.38:
 
 * Add PATH to environment
