@@ -42,10 +42,6 @@ end
 action :before_deploy do
   ENV.update(environment_attributes)
 
-  if new_resource.environment.has_key?('PATH_PREFIX')
-    ENV['PATH'] = "#{new_resource.environment['PATH_PREFIX']}:#{ENV['PATH']}"
-  end
-
   if ::File.exists?(procfile_path)
     # Load application's Procfile
     pf = procfile
