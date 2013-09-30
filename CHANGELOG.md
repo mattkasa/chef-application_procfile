@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.42:
+
+* Remove PATH_PREFIX prepend from ENV
+
 ## 0.1.41:
 
 * Use PATH_PREFIX instead of PATH to avoid overriding PATH
