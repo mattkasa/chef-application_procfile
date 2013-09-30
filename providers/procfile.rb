@@ -42,6 +42,10 @@ end
 action :before_deploy do
   ENV.update(environment_attributes)
 
+  if new_resource.environment.has_key?('PATH_PREFIX')
+    ENV['PATH'] = "#{new_resource.environment['PATH_PREFIX']}:#{ENV['PATH']}"
+  end
+
   if ::File.exists?(procfile_path)
     # Load application's Procfile
     pf = procfile
@@ -229,7 +233,7 @@ def create_environment_sh
     group 'root'
     mode '0755'
     variables ({
-      :path => new_resource.environment['PATH'],
+      :path_prefix => new_resource.environment['PATH_PREFIX'],
       :environment_attributes => environment_attributes
     })
     notifies :run, "execute[application_procfile_reload]", :delayed
