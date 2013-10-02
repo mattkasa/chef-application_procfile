@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.44:
+
+* Remove unnecessary environment update
+
 ## 0.1.43:
 
 * Use application environment instead of ENV
