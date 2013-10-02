@@ -41,7 +41,6 @@ end
 
 action :before_deploy do
   new_resource.application.environment.update(environment_attributes)
-  new_resource.environment.update(environment_attributes)
 
   if ::File.exists?(procfile_path)
     # Load application's Procfile
