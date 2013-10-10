@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.47
+
+* Try updating all the application sub-resource environments
+
 ## 0.1.45
 
 * Move application environment population to before_compile
