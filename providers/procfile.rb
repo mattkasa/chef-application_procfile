@@ -30,8 +30,6 @@ end
 include Chef::DSL::IncludeRecipe
 
 action :before_compile do
-  new_resource.application.environment.update(environment_attributes)
-
   unless new_resource.restart_command
     new_resource.restart_command do
       execute 'application_procfile_reload' do
@@ -42,6 +40,11 @@ action :before_compile do
 end
 
 action :before_deploy do
+  new_resource.application.environment.update(environment_attributes)
+  new_resource.application.sub_resources.each do |sub_resource|
+    sub_resource.environment.update(environment_attributes)
+  end
+
   if ::File.exists?(procfile_path)
     # Load application's Procfile
     pf = procfile
