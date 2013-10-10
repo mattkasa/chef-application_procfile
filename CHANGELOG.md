@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.45
+
+* Add BUNDLE_GEMFILE to unicorn.rb to support zero-downtime deploys
+
 ## 0.1.44:
 
 * Remove unnecessary environment update
