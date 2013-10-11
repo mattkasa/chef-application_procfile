@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.1.48
+
+* Fix working directory used in BUNDLE_GEMFILE
+
 ## 0.1.47
 
 * Try updating all the application sub-resource environments
