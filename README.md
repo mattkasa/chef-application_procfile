@@ -57,7 +57,9 @@ The `reload` option specifies an optional signal that can be sent to processes t
 touch /var/lock/subsys/someapp/web.reload
 ```
 
-To properly support the `reload` option for unicorn processes, a unicorn.rb with before_fork, correct paths and worker numbers will be installed in the shared directory and will include your `config/unicorn.rb` if you have one.
+If the process is unicorn a HUP and USR2 combination will be used automatically, with no need for the `reload` option.
+
+To properly support reloads for unicorn processes, a unicorn.rb with before_fork, correct paths and worker numbers will be installed in the shared directory and will include your `config/unicorn.rb` if you have one.
 
 Contributing
 ------------
