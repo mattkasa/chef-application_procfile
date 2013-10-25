@@ -16,7 +16,9 @@ check file <%= "#{@name}-#{@type}" %>.restart with path <%= lock_path %>/<%= @ty
   if changed timestamp then restart
 
 check file <%= "#{@name}-#{@type}" %>.reload with path <%= lock_path %>/<%= @type %>.reload
-<% if @options && @options.has_key?(:reload) %>
+<% if unicorn?(@command) %>
+  if changed timestamp then exec "/bin/bash -c 'pid=$(cat <%= pid_path %>/<%= @type %>-*.pid); kill -s HUP $pid; sleep 5; kill -s USR2 $pid'"
+<% elsif @options && @options.has_key?(:reload) %>
   if changed timestamp then exec "/bin/bash -c 'kill -s <%= @options[:reload] %> $(cat <%= pid_path %>/<%= @type %>-*.pid)'"
 <% else %>
   if changed timestamp then restart

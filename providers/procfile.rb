@@ -63,7 +63,7 @@ action :before_deploy do
         create_lock_file(type.to_s, 'reload')
         create_environment_sh
         create_initscript(type.to_s, command)
-        create_monitrc(type.to_s, (unicorn?(command) ? 1 : options[0]), options[1])
+        create_monitrc(type.to_s, options[0], command, options[1])
       else
         Chef::Log.warn("Missing Procfile entry for '#{type}'")
       end
@@ -129,7 +129,7 @@ action :before_restart do
       create_lock_file(type.to_s, 'reload')
       create_environment_sh
       create_initscript(type.to_s, command)
-      create_monitrc(type.to_s, (unicorn?(command) ? 1 : options[0]), options[1])
+      create_monitrc(type.to_s, options[0], command, options[1])
     else
       Chef::Log.warn("Missing Procfile entry for '#{type}'")
     end

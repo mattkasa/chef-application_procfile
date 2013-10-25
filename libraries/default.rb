@@ -116,7 +116,7 @@ def create_initscript(type, command)
   end
 end
 
-def create_monitrc(type, number, options)
+def create_monitrc(type, number, command, options)
   execute 'application_procfile_monit_reload' do
     command '/etc/init.d/monit reload'
     action :nothing
@@ -131,7 +131,8 @@ def create_monitrc(type, number, options)
     variables ({
       :name => new_resource.name,
       :type => type,
-      :number => number,
+      :number => (unicorn?(command) ? 1 : number),
+      :command => command,
       :options => options
     })
     notifies :run, 'execute[application_procfile_monit_reload]', :immediately
