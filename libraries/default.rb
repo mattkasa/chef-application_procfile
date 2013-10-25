@@ -65,10 +65,8 @@ def create_unicorn_rb(type='web', workers=1, app_unicorn_rb_path="#{::File.join(
     group 'root'
     mode '644'
     variables(
-      :current_path => current_path,
-      :env_path => environment_sh_path,
       :app_unicorn_rb_path => app_unicorn_rb_path,
-      :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
+      :pid_file => ::File.join(shared_path, 'unicorn.pid'),
       :monit_pid_file => ::File.join(pid_path, "#{type}-0.pid"),
       :workers => workers
     )
@@ -97,8 +95,7 @@ def create_environment_sh
     group 'root'
     mode '0755'
     variables ({
-      :path_prefix => new_resource.application.environment['PATH_PREFIX'],
-      :environment_attributes => environment_attributes
+      :path_prefix => new_resource.application.environment['PATH_PREFIX']
     })
     notifies :run, "execute[application_procfile_reload]", :delayed
   end
@@ -114,10 +111,6 @@ def create_initscript(type, command)
     variables ({
       :name => new_resource.name,
       :type => type,
-      :env_path => environment_sh_path,
-      :current_path => current_path,
-      :pid_path => pid_path,
-      :log_path => log_path,
       :command => command
     })
   end
@@ -139,9 +132,7 @@ def create_monitrc(type, number, options)
       :name => new_resource.name,
       :type => type,
       :number => number,
-      :options => options,
-      :lock_path => lock_path,
-      :pid_path => pid_path
+      :options => options
     })
     notifies :run, 'execute[application_procfile_monit_reload]', :immediately
   end

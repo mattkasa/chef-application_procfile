@@ -1,8 +1,8 @@
-env_file = '<%= @env_path %>'
+env_file = '<%= environment_sh_path %>'
 config_file = '<%= @app_unicorn_rb_path %>'
 instance_eval(File.read(config_file), config_file) if File.exists?(config_file)
 
-working_directory '<%= @current_path %>'
+working_directory '<%= current_path %>'
 pid '<%= @pid_file %>'
 
 preload_app true

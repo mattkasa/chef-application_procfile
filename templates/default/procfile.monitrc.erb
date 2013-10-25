@@ -4,20 +4,20 @@
 # ---------------------------------------------------------------
 
 <% @number.times do |i| %>
-check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile <%= @pid_path %>/<%= @type %>-<%= i %>.pid
+check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile <%= pid_path %>/<%= @type %>-<%= i %>.pid
   depends on <%= "#{@name}-#{@type}" %>.restart
   depends on <%= "#{@name}-#{@type}" %>.reload
-  start program = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
-  stop program  = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> stop'"
+  start program = "/bin/bash -c 'PID_FILE=<%= pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
+  stop program  = "/bin/bash -c 'PID_FILE=<%= pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> stop'"
   group <%= "#{@name}-#{@type}" %>
 <% end %>
 
-check file <%= "#{@name}-#{@type}" %>.restart with path <%= @lock_path %>/<%= @type %>.restart
+check file <%= "#{@name}-#{@type}" %>.restart with path <%= lock_path %>/<%= @type %>.restart
   if changed timestamp then restart
 
-check file <%= "#{@name}-#{@type}" %>.reload with path <%= @lock_path %>/<%= @type %>.reload
+check file <%= "#{@name}-#{@type}" %>.reload with path <%= lock_path %>/<%= @type %>.reload
 <% if @options && @options.has_key?(:reload) %>
-  if changed timestamp then exec "/bin/bash -c 'kill -s <%= @options[:reload] %> $(cat <%= @pid_path %>/<%= @type %>-*.pid)'"
+  if changed timestamp then exec "/bin/bash -c 'kill -s <%= @options[:reload] %> $(cat <%= pid_path %>/<%= @type %>-*.pid)'"
 <% else %>
   if changed timestamp then restart
 <% end %>

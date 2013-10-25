@@ -1,9 +1,9 @@
 #!/bin/bash
 
-source '<%= @env_path %>'
+source '<%= environment_sh_path %>'
 
-PID_FILE=${PID_FILE:-<%= @pid_path %>/<%= @type %>.pid}
-LOG_FILE=${LOG_FILE:-<%= @log_path %>/<%= @type %>.log}
+PID_FILE=${PID_FILE:-<%= pid_path %>/<%= @type %>.pid}
+LOG_FILE=${LOG_FILE:-<%= log_path %>/<%= @type %>.log}
 
 STATUS_RUNNING=0
 STATUS_DEAD_WITH_PID=1
@@ -27,7 +27,7 @@ function start() {
       fi
     fi
 
-    cd <%= @current_path %>
+    cd <%= current_path %>
     <%= @command %> >> $LOG_FILE 2>&1 &
     PID="$!"
 
