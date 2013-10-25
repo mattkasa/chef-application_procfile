@@ -4,12 +4,20 @@ rescue LoadError
   Chef::Log.warn("Missing gem 'foreman'")
 end
 
+def current_path
+  @current_path ||= ::File.join(new_resource.application.path, 'current')
+end
+
+def shared_path
+  @shared_path ||= ::File.join(new_resource.application.path, 'shared')
+end
+
 def environment_sh_path
-  @environment_sh_path ||= ::File.join(new_resource.application.path, 'shared', 'environment.sh')
+  @environment_sh_path ||= ::File.join(shared_path, 'environment.sh')
 end
 
 def procfile_path
-  @procfile_path ||= ::File.join(new_resource.application.path, 'current', 'Procfile')
+  @procfile_path ||= ::File.join(current_path, 'Procfile')
 end
 
 def lock_path
@@ -25,7 +33,7 @@ def log_path
 end
 
 def unicorn_rb_path
-  @unicorn_rb_path ||= ::File.join(new_resource.application.path, 'shared', 'unicorn.rb')
+  @unicorn_rb_path ||= ::File.join(shared_path, 'unicorn.rb')
 end
 
 def procfile
@@ -45,7 +53,7 @@ def unicorn?(command)
   command.to_s.include?('unicorn')
 end
 
-def create_unicorn_rb(type='web', workers=1, app_unicorn_rb_path="#{::File.join(new_resource.application.path, 'current', 'config', 'unicorn.rb')}")
+def create_unicorn_rb(type='web', workers=1, app_unicorn_rb_path="#{::File.join(current_path, 'config', 'unicorn.rb')}")
   execute "application_procfile_reload_#{type}" do
     command "touch #{::File.join(lock_path, "#{type}.reload")}"
     action :nothing
@@ -57,7 +65,7 @@ def create_unicorn_rb(type='web', workers=1, app_unicorn_rb_path="#{::File.join(
     group 'root'
     mode '644'
     variables(
-      :current_path => ::File.join(new_resource.application.path, 'current'),
+      :current_path => current_path,
       :env_path => environment_sh_path,
       :app_unicorn_rb_path => app_unicorn_rb_path,
       :pid_file => ::File.join(new_resource.application.path, 'shared', 'unicorn.pid'),
@@ -107,7 +115,7 @@ def create_initscript(type, command)
       :name => new_resource.name,
       :type => type,
       :env_path => environment_sh_path,
-      :current_path => ::File.join(new_resource.application.path, 'current'),
+      :current_path => current_path,
       :pid_path => pid_path,
       :log_path => log_path,
       :command => command
