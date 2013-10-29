@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.2.4
+
+* Move directives in unicorn.rb so they can be overridden by the application
+
 ## 0.2.3
 
 * Remove unicorn start context hack
