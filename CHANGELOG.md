@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.2.3
+
+* Remove unicorn start context hack
+
 ## 0.2.2
 
 * Fix issue with PATH during environment reload
