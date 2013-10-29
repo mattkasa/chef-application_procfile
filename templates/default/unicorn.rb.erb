@@ -30,6 +30,12 @@ before_fork do |server, worker|
 
   # Support reloading the environment
   if File.exists?(env_file)
-    ENV.update(Hash[*File.read(env_file).gsub(/^(?:#.*|\s*)$/, '').gsub(/(?:^\n*|\n*$)/, '').gsub(/^export ([^=]+)=["']?(.*?)["']?$/, "\\1\n\\2").split(/\n/)])
+    new_env = Hash[*File.read(env_file).gsub(/^(?:#.*|\s*)$/, '').gsub(/(?:^\n*|\n*$)/, '').gsub(/^export ([^=]+)=["']?(.*?)["']?$/, "\\1\n\\2").split(/\n/)]
+    new_env.delete('PATH')
+    if new_env.has_key?('PATH_PREFIX')
+      new_env['PATH'] = "#{new_env['PATH_PREFIX']}:#{ENV['PATH']}" unless ENV['PATH'].include?(new_env['PATH_PREFIX'])
+      new_env.delete('PATH_PREFIX')
+    end
+    ENV.update(new_env)
   end
 end
