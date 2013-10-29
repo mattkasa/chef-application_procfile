@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.2.1
+
+* Move methods back out of libraries until we find a pattern that works
+
 ## 0.2.0
 
 * Refactor library methods and add more Unicorn magic
