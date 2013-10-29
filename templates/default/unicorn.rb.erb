@@ -1,12 +1,13 @@
 env_file = '<%= @environment_sh_path %>'
 config_file = '<%= @app_unicorn_rb_path %>'
+
+preload_app true
+timeout 60
+
 instance_eval(File.read(config_file), config_file) if File.exists?(config_file)
 
 working_directory '<%= @current_path %>'
 pid '<%= @pid_file %>'
-
-preload_app true
-timeout 60
 worker_processes <%= @workers %>
 
 before_exec do |server|
