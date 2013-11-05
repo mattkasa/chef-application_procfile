@@ -65,6 +65,28 @@ action :before_deploy do
           end
         end
 
+        create_lock_directory
+
+        # Migrate pid files from /var/run to /var/local
+        ruby_block "migrate_#{type}_pid_files" do
+          block do
+            require 'fileutils'
+            old_pid_path = ::File.join('/var', 'run', new_resource.name)
+            if ::File.exists?(old_pid_path)
+              ::Dir.glob(::File.join(old_pid_path, "#{type}*.pid")) do |pid_file|
+                ::FileUtils.mv(pid_file, ::File.join(pid_path, ::File.basename(pid_file)))
+              end
+            end
+          end
+        end
+
+        # Remove old lock files
+        ['restart', 'reload'].each do |suffix|
+          file ::File.join('/var', 'lock', 'subsys', new_resource.name, "#{type}.#{suffix}") do
+            action :delete
+          end
+        end
+
         create_lock_file(type.to_s, 'restart')
         create_lock_file(type.to_s, 'reload')
         create_environment_sh
@@ -131,34 +153,7 @@ action :before_restart do
         end
       end
 
-      directory lock_path do
-        owner 'root'
-        group 'root'
-        mode '0755'
-        recursive true
-        action :create
-      end
-
-      # Migrate pid files from /var/run to /var/local
-      ruby_block "migrate_#{type}_pid_files" do
-        block do
-          require 'fileutils'
-          old_pid_path = ::File.join('/var', 'run', new_resource.name)
-          if ::File.exists?(old_pid_path)
-            ::Dir.glob(::File.join(old_pid_path, "#{type}*.pid")) do |pid_file|
-              ::FileUtils.mv(pid_file, ::File.join(pid_path, ::File.basename(pid_file)))
-            end
-          end
-        end
-      end
-
-      # Remove old lock files
-      ['restart', 'reload'].each do |suffix|
-        file ::File.join('/var', 'lock', 'subsys', new_resource.name, "#{type}.#{suffix}") do
-          action :delete
-        end
-      end
-
+      create_lock_directory
       create_lock_file(type.to_s, 'restart')
       create_lock_file(type.to_s, 'reload')
       create_environment_sh
@@ -253,6 +248,16 @@ def create_lock_file(type, suffix)
     group 'root'
     mode '0644'
     action :create_if_missing
+  end
+end
+
+def create_lock_directory
+  directory lock_path do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+    action :create
   end
 end
 
