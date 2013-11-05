@@ -131,6 +131,14 @@ action :before_restart do
         end
       end
 
+      directory lock_path do
+        owner 'root'
+        group 'root'
+        mode '0755'
+        recursive true
+        action :create
+      end
+
       # Migrate pid files from /var/run to /var/local
       ruby_block "migrate_#{type}_pid_files" do
         block do
