@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.2.6
+
+* Ensure enclosing lock directory exists
+
 ## 0.2.5
 
 * Move lock and pid files to /var/local since /var/run and /var/lock are tmpfs mounts in ubuntu
