@@ -48,13 +48,13 @@ Any output to stderr or stdout from your processes will be logged to files like:
 To restart your workers:
 
 ```bash
-touch /var/lock/subsys/someapp/worker.restart
+touch /var/local/someapp/worker.restart
 ```
 
 The `reload` option specifies an optional signal that can be sent to processes to gracefully reload them by doing:
 
 ```bash
-touch /var/lock/subsys/someapp/web.reload
+touch /var/local/someapp/web.reload
 ```
 
 If the process is unicorn a HUP and USR2 combination will be used automatically, with no need for the `reload` option.

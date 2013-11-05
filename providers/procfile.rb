@@ -33,7 +33,7 @@ action :before_compile do
   unless new_resource.restart_command
     new_resource.restart_command do
       execute 'application_procfile_reload' do
-        command "touch /var/lock/subsys/#{new_resource.name}/*.reload"
+        command "touch /var/local/#{new_resource.name}/*.reload"
       end
     end
   end
@@ -131,6 +131,26 @@ action :before_restart do
         end
       end
 
+      # Migrate pid files from /var/run to /var/local
+      ruby_block "migrate_#{type}_pid_files" do
+        block do
+          require 'fileutils'
+          old_pid_path = ::File.join('/var', 'run', new_resource.name)
+          if ::File.exists?(old_pid_path)
+            ::Dir.glob(::File.join(old_pid_path, "#{type}*.pid")) do |pid_file|
+              ::FileUtils.mv(pid_file, ::File.join(pid_path, ::File.basename(pid_file)))
+            end
+          end
+        end
+      end
+
+      # Remove old lock files
+      ['restart', 'reload'].each do |suffix|
+        file ::File.join('/var', 'lock', 'subsys', new_resource.name, "#{type}.#{suffix}") do
+          action :delete
+        end
+      end
+
       create_lock_file(type.to_s, 'restart')
       create_lock_file(type.to_s, 'reload')
       create_environment_sh
@@ -164,11 +184,11 @@ def procfile_path
 end
 
 def lock_path
-  @lock_path ||= ::File.join('/var', 'lock', 'subsys', new_resource.name)
+  @lock_path ||= ::File.join('/var', 'local', new_resource.name)
 end
 
 def pid_path
-  @pid_path ||= ::File.join('/var', 'run', new_resource.name)
+  @pid_path ||= ::File.join('/var', 'local', new_resource.name)
 end
 
 def log_path
