@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.2.7
+
+* Perform lock and pid file migration during before_deploy
+
 ## 0.2.6
 
 * Ensure enclosing lock directory exists
