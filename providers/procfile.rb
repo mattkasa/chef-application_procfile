@@ -211,8 +211,7 @@ def procfile_types(pf=procfile)
 end
 
 def environment_attributes
-  mash = (m = node[new_resource.name.to_sym] and m.has_key?(:env) ? m[:env] : m)
-  mash.inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
+  node[new_resource.name.to_sym].inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
 end
 
 def unicorn?(command)
