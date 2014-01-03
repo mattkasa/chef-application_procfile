@@ -1,5 +1,5 @@
 class Chef
-  module Application
+  class Application
     module Procfile
       module Helpers
         extend self
