@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.2
+
+* Put helper methods inside Chef Application namespace
+
 ## 0.3.1
 
 * Put helper methods inside Chef namespace
