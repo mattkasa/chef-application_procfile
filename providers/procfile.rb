@@ -28,7 +28,7 @@ rescue LoadError
 end
 
 include Chef::DSL::IncludeRecipe
-include Application::Procfile::Helpers
+include Chef::Application::Procfile::Helpers
 
 action :before_compile do
   unless new_resource.restart_command
