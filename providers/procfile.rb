@@ -28,7 +28,10 @@ rescue LoadError
 end
 
 include Chef::DSL::IncludeRecipe
-include Chef::Application::Procfile::Helpers
+
+module Helpers
+  extend Chef::Application::Procfile::Helpers
+end
 
 action :before_compile do
   unless new_resource.restart_command
@@ -43,30 +46,30 @@ end
 action :before_deploy do
   new_resource.application.environment.update(environment_attributes)
   new_resource.application.sub_resources.each do |sub_resource|
-    sub_resource.environment.update(environment_attributes)
+    sub_resource.environment.update(Helpers.environment_attributes)
   end
 
-  if ::File.exists?(procfile_path)
+  if ::File.exists?(Helpers.procfile_path)
     # Load application's Procfile
-    pf = procfile
-    process_types = procfile_types(pf)
+    pf = Helpers.procfile
+    process_types = Helpers.procfile_types(pf)
 
     # Go through the process types we know about
     new_resource.processes.each do |type, options|
       if process_types.include?(type.to_s)
         command = pf[type.to_s]
-        if unicorn?(command)
+        if Helpers.unicorn?(command)
           if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
             app_unicorn_rb_path = $1
-            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{unicorn_rb_path}")
-            create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
+            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{Helpers.unicorn_rb_path}")
+            Helpers.create_unicorn_rb(type.to_s, options[0], Helpers.app_unicorn_rb_path)
           else
-            command.gsub!(/(unicorn\s+)/, "\\1-c #{unicorn_rb_path} ")
-            create_unicorn_rb(type.to_s, options[0])
+            command.gsub!(/(unicorn\s+)/, "\\1-c #{Helpers.unicorn_rb_path} ")
+            Helpers.create_unicorn_rb(type.to_s, options[0])
           end
         end
 
-        create_lock_directory
+        Helpers.create_lock_directory
 
         # Migrate pid files from /var/run to /var/local
         ruby_block "migrate_#{type}_pid_files" do
@@ -75,7 +78,7 @@ action :before_deploy do
             old_pid_path = ::File.join('/var', 'run', new_resource.name)
             if ::File.exists?(old_pid_path)
               ::Dir.glob(::File.join(old_pid_path, "#{type}*.pid")) do |pid_file|
-                ::FileUtils.mv(pid_file, ::File.join(pid_path, ::File.basename(pid_file)))
+                ::FileUtils.mv(pid_file, ::File.join(Helpers.pid_path, ::File.basename(pid_file)))
               end
             end
           end
@@ -88,11 +91,11 @@ action :before_deploy do
           end
         end
 
-        create_lock_file(type.to_s, 'restart')
-        create_lock_file(type.to_s, 'reload')
-        create_environment_sh
-        create_initscript(type.to_s, command)
-        create_monitrc(type.to_s, options[0], command, options[1])
+        Helpers.create_lock_file(type.to_s, 'restart')
+        Helpers.create_lock_file(type.to_s, 'reload')
+        Helpers.create_environment_sh
+        Helpers.create_initscript(type.to_s, command)
+        Helpers.create_monitrc(type.to_s, options[0], command, options[1])
       else
         Chef::Log.warn("Missing Procfile entry for '#{type}'")
       end
@@ -111,7 +114,7 @@ action :before_restart do
 
   new_resource = @new_resource
 
-  directory lock_path do
+  directory Helpers.lock_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -119,7 +122,7 @@ action :before_restart do
     action :create
   end
 
-  directory pid_path do
+  directory Helpers.pid_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -127,7 +130,7 @@ action :before_restart do
     action :create
   end
 
-  directory log_path do
+  directory Helpers.log_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -136,30 +139,30 @@ action :before_restart do
   end
 
   # Load application's Procfile
-  pf = procfile
-  process_types = procfile_types(pf)
+  pf = Helpers.procfile
+  process_types = Helpers.procfile_types(pf)
 
   # Go through the process types we know about
   new_resource.processes.each do |type, options|
     if process_types.include?(type.to_s)
       command = pf[type.to_s]
-      if unicorn?(command)
+      if Helpers.unicorn?(command)
         if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
           app_unicorn_rb_path = $1
-          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{unicorn_rb_path}")
-          create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
+          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{Helpers.unicorn_rb_path}")
+          Helpers.create_unicorn_rb(type.to_s, options[0], Helpers.app_unicorn_rb_path)
         else
-          command.gsub!(/(unicorn\s+)/, "\\1-c #{unicorn_rb_path} ")
-          create_unicorn_rb(type.to_s, options[0])
+          command.gsub!(/(unicorn\s+)/, "\\1-c #{Helpers.unicorn_rb_path} ")
+          Helpers.create_unicorn_rb(type.to_s, options[0])
         end
       end
 
-      create_lock_directory
-      create_lock_file(type.to_s, 'restart')
-      create_lock_file(type.to_s, 'reload')
-      create_environment_sh
-      create_initscript(type.to_s, command)
-      create_monitrc(type.to_s, options[0], command, options[1])
+      Helpers.create_lock_directory
+      Helpers.create_lock_file(type.to_s, 'restart')
+      Helpers.create_lock_file(type.to_s, 'reload')
+      Helpers.create_environment_sh
+      Helpers.create_initscript(type.to_s, command)
+      Helpers.create_monitrc(type.to_s, options[0], command, options[1])
     else
       Chef::Log.warn("Missing Procfile entry for '#{type}'")
     end
