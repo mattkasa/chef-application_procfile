@@ -44,9 +44,9 @@ action :before_compile do
 end
 
 action :before_deploy do
-  new_resource.application.environment.update(Helpers.environment_attributes)
+  new_resource.application.environment.update(Helpers.environment_attributes(node))
   new_resource.application.sub_resources.each do |sub_resource|
-    sub_resource.environment.update(Helpers.environment_attributes)
+    sub_resource.environment.update(Helpers.environment_attributes(node))
   end
 
   if ::File.exists?(Helpers.procfile_path)
