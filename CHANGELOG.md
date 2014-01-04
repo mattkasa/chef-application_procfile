@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.7
+
+* Pass new_resource to library helper methods
+
 ## 0.3.6
 
 * Pass node to environment_attributes call
