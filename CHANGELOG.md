@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.5
+
+* Fix environment_attributes call
+
 ## 0.3.4
 
 * Namespace helper methods inside Helpers module
