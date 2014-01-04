@@ -50,7 +50,7 @@ class Chef
           [].tap { |a| pf.entries { |n,c| a << n } }
         end
 
-        def environment_attributes
+        def environment_attributes(node)
           node[new_resource.name.to_sym].inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
         end
 
