@@ -52,7 +52,7 @@ module ApplicationProcfile
       [].tap { |a| pf.entries { |n,c| a << n } }
     end
 
-    def environment_attributes(node, new_resource)
+    def environment_attributes
       node[new_resource.name.to_sym].inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
     end
 

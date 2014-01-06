@@ -28,7 +28,7 @@ rescue LoadError
 end
 
 include Chef::DSL::IncludeRecipe
-extend ApplicationProcfile::Helpers
+include ApplicationProcfile::Helpers
 
 def create_unicorn_rb(type = 'web', workers = 1, app_unicorn_rb_path)
   execute "application_procfile_reload_#{type}" do
