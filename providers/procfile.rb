@@ -29,7 +29,7 @@ end
 
 include Chef::DSL::IncludeRecipe
 
-Helpers = ProcfileHelpers.new(new_resource, node)
+Helpers = ProcfileHelpers.new
 
 def create_unicorn_rb(type = 'web', workers = 1, app_unicorn_rb_path)
   execute "application_procfile_reload_#{type}" do
@@ -147,6 +147,9 @@ action :before_compile do
 end
 
 action :before_deploy do
+  Helpers.new_resource = new_resource
+  Helpers.node = node
+
   new_resource.application.environment.update(Helpers.environment_attributes)
   new_resource.application.sub_resources.each do |sub_resource|
     sub_resource.environment.update(Helpers.environment_attributes)
@@ -216,6 +219,9 @@ action :before_restart do
   include_recipe 'monit'
 
   new_resource = @new_resource
+
+  Helpers.new_resource = new_resource
+  Helpers.node = node
 
   directory Helpers.lock_path do
     owner 'root'
