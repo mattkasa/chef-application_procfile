@@ -28,14 +28,15 @@ rescue LoadError
 end
 
 include Chef::DSL::IncludeRecipe
-include ProcfileHelpers
+
+Helpers = ProcfileHelpers.new(new_resource, node)
 
 def create_unicorn_rb(type = 'web', workers = 1, app_unicorn_rb_path)
   execute "application_procfile_reload_#{type}" do
-    command "touch #{::File.join(ProcfileHelpers.lock_path, "#{type}.reload")}"
+    command "touch #{::File.join(Helpers.lock_path, "#{type}.reload")}"
     action :nothing
   end
-  template ProcfileHelpers.shared_unicorn_rb_path do
+  template Helpers.shared_unicorn_rb_path do
     source 'unicorn.rb.erb'
     cookbook 'application_procfile'
     owner 'root'
@@ -43,18 +44,18 @@ def create_unicorn_rb(type = 'web', workers = 1, app_unicorn_rb_path)
     mode '644'
     variables(
       :app_unicorn_rb_path => app_unicorn_rb_path,
-      :pid_file => ::File.join(ProcfileHelpers.shared_path, 'unicorn.pid'),
-      :monit_pid_file => ::File.join(ProcfileHelpers.pid_path, "#{type}-0.pid"),
+      :pid_file => ::File.join(Helpers.shared_path, 'unicorn.pid'),
+      :monit_pid_file => ::File.join(Helpers.pid_path, "#{type}-0.pid"),
       :workers => workers,
-      :environment_sh_path => ProcfileHelpers.environment_sh_path,
-      :current_path => ProcfileHelpers.current_path
+      :environment_sh_path => Helpers.environment_sh_path,
+      :current_path => Helpers.current_path
     )
     notifies :run, "execute[application_procfile_reload_#{type}]", :delayed
   end
 end
 
 def create_lock_file(type, suffix)
-  file ::File.join(ProcfileHelpers.lock_path, "#{type}.#{suffix}") do
+  file ::File.join(Helpers.lock_path, "#{type}.#{suffix}") do
     owner 'root'
     group 'root'
     mode '0644'
@@ -63,7 +64,7 @@ def create_lock_file(type, suffix)
 end
 
 def create_lock_directory
-  directory ProcfileHelpers.lock_path do
+  directory Helpers.lock_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -74,10 +75,10 @@ end
 
 def create_environment_sh
   execute "application_procfile_reload" do
-    command "touch #{::File.join(ProcfileHelpers.lock_path, '*.reload')}"
+    command "touch #{::File.join(Helpers.lock_path, '*.reload')}"
     action :nothing
   end
-  template ProcfileHelpers.environment_sh_path do
+  template Helpers.environment_sh_path do
     source 'environment.sh.erb'
     cookbook 'application_procfile'
     owner 'root'
@@ -85,7 +86,7 @@ def create_environment_sh
     mode '0755'
     variables ({
       :path_prefix => new_resource.application.environment['PATH_PREFIX'],
-      :environment_attributes => ProcfileHelpers.environment_attributes
+      :environment_attributes => Helpers.environment_attributes
     })
     notifies :run, "execute[application_procfile_reload]", :delayed
   end
@@ -102,10 +103,10 @@ def create_initscript(type, command)
       :name => new_resource.name,
       :type => type,
       :command => command,
-      :environment_sh_path => ProcfileHelpers.environment_sh_path,
-      :pid_path => ProcfileHelpers.pid_path,
-      :log_path => ProcfileHelpers.log_path,
-      :current_path => ProcfileHelpers.current_path
+      :environment_sh_path => Helpers.environment_sh_path,
+      :pid_path => Helpers.pid_path,
+      :log_path => Helpers.log_path,
+      :current_path => Helpers.current_path
     })
   end
 end
@@ -125,11 +126,11 @@ def create_monitrc(type, number, command, options)
     variables ({
       :name => new_resource.name,
       :type => type,
-      :number => (ProcfileHelpers.unicorn?(command) ? 1 : number),
-      :unicorn => ProcfileHelpers.unicorn?(command),
+      :number => (Helpers.unicorn?(command) ? 1 : number),
+      :unicorn => Helpers.unicorn?(command),
       :options => options,
-      :pid_path => ProcfileHelpers.pid_path,
-      :lock_path => ProcfileHelpers.lock_path
+      :pid_path => Helpers.pid_path,
+      :lock_path => Helpers.lock_path
     })
     notifies :run, 'execute[application_procfile_monit_reload]', :immediately
   end
@@ -146,27 +147,27 @@ action :before_compile do
 end
 
 action :before_deploy do
-  new_resource.application.environment.update(ProcfileHelpers.environment_attributes)
+  new_resource.application.environment.update(Helpers.environment_attributes)
   new_resource.application.sub_resources.each do |sub_resource|
-    sub_resource.environment.update(ProcfileHelpers.environment_attributes)
+    sub_resource.environment.update(Helpers.environment_attributes)
   end
 
-  if ::File.exists?(ProcfileHelpers.procfile_path)
+  if ::File.exists?(Helpers.procfile_path)
     # Load application's Procfile
-    pf = ProcfileHelpers.procfile
-    process_types = ProcfileHelpers.procfile_types(pf)
+    pf = Helpers.procfile
+    process_types = Helpers.procfile_types(pf)
 
     # Go through the process types we know about
     new_resource.processes.each do |type, options|
       if process_types.include?(type.to_s)
         command = pf[type.to_s]
-        if ProcfileHelpers.unicorn?(command)
+        if Helpers.unicorn?(command)
           if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
             app_unicorn_rb_path = $1
-            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{ProcfileHelpers.shared_unicorn_rb_path}")
+            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{Helpers.shared_unicorn_rb_path}")
             create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
           else
-            command.gsub!(/(unicorn\s+)/, "\\1-c #{ProcfileHelpers.shared_unicorn_rb_path} ")
+            command.gsub!(/(unicorn\s+)/, "\\1-c #{Helpers.shared_unicorn_rb_path} ")
             create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
           end
         end
@@ -180,7 +181,7 @@ action :before_deploy do
             old_pid_path = ::File.join('/var', 'run', new_resource.name)
             if ::File.exists?(old_pid_path)
               ::Dir.glob(::File.join(old_pid_path, "#{type}*.pid")) do |pid_file|
-                ::FileUtils.mv(pid_file, ::File.join(ProcfileHelpers.pid_path, ::File.basename(pid_file)))
+                ::FileUtils.mv(pid_file, ::File.join(Helpers.pid_path, ::File.basename(pid_file)))
               end
             end
           end
@@ -216,7 +217,7 @@ action :before_restart do
 
   new_resource = @new_resource
 
-  directory ProcfileHelpers.lock_path do
+  directory Helpers.lock_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -224,7 +225,7 @@ action :before_restart do
     action :create
   end
 
-  directory ProcfileHelpers.pid_path do
+  directory Helpers.pid_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -232,7 +233,7 @@ action :before_restart do
     action :create
   end
 
-  directory ProcfileHelpers.log_path do
+  directory Helpers.log_path do
     owner 'root'
     group 'root'
     mode '0755'
@@ -241,20 +242,20 @@ action :before_restart do
   end
 
   # Load application's Procfile
-  pf = ProcfileHelpers.procfile
-  process_types = ProcfileHelpers.procfile_types(pf)
+  pf = Helpers.procfile
+  process_types = Helpers.procfile_types(pf)
 
   # Go through the process types we know about
   new_resource.processes.each do |type, options|
     if process_types.include?(type.to_s)
       command = pf[type.to_s]
-      if ProcfileHelpers.unicorn?(command)
+      if Helpers.unicorn?(command)
         if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
           app_unicorn_rb_path = $1
-          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{ProcfileHelpers.shared_unicorn_rb_path}")
+          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{Helpers.shared_unicorn_rb_path}")
           create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
         else
-          command.gsub!(/(unicorn\s+)/, "\\1-c #{ProcfileHelpers.shared_unicorn_rb_path} ")
+          command.gsub!(/(unicorn\s+)/, "\\1-c #{Helpers.shared_unicorn_rb_path} ")
           create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
         end
       end
