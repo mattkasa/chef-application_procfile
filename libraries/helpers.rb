@@ -1,3 +1,5 @@
+require 'singleton'
+
 begin
   require 'foreman/procfile'
 rescue LoadError
@@ -5,6 +7,8 @@ rescue LoadError
 end
 
 class ProcfileHelpers
+  include Singleton
+
   attr_accessor :new_resource
   attr_accessor :node
 
