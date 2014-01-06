@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.15
+
+* Make ProcfileHelpers a singleton
+
 ## 0.3.14
 
 * Move new_resource and node initialization to attributes set from action blocks
