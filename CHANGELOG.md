@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.11
+
+* Move helper methods into ProcfileHelpers module
+
 ## 0.3.10
 
 * Try not overlapping namespaces
