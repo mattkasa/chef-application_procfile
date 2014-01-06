@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.10
+
+* Try not overlapping namespaces
+
 ## 0.3.9
 
 * Try include instead of extend since we are in an instance of Chef::Provider
