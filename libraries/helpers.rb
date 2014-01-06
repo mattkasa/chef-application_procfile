@@ -5,10 +5,8 @@ rescue LoadError
 end
 
 class ProcfileHelpers
-  def new(new_resource, node)
-    @new_resource = new_resource
-    @node = node
-  end
+  attr_accessor :new_resource
+  attr_accessor :node
 
   def current_path
     @current_path ||= ::File.join(@new_resource.application.path, 'current')
