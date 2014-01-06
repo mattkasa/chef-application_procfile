@@ -4,7 +4,7 @@ rescue LoadError
   Chef::Log.warn("Missing gem 'foreman'")
 end
 
-module ApplicationProcfile
+module Procfile
   module Helpers
     extend self
 
