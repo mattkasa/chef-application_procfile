@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.12
+
+* Include ProcfileHelpers in the scope of the provider so it has access to node and new_resource
+
 ## 0.3.11
 
 * Move helper methods into ProcfileHelpers module
