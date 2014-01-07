@@ -9,15 +9,16 @@ end
 class ProcfileHelpers
   include Singleton
 
-  attr_accessor :new_resource
+  attr_accessor :path
+  attr_accessor :name
   attr_accessor :node
 
   def current_path
-    @current_path ||= ::File.join(@new_resource.application.path, 'current')
+    @current_path ||= ::File.join(@path, 'current')
   end
 
   def shared_path
-    @shared_path ||= ::File.join(@new_resource.application.path, 'shared')
+    @shared_path ||= ::File.join(@path, 'shared')
   end
 
   def environment_sh_path
@@ -29,15 +30,15 @@ class ProcfileHelpers
   end
 
   def lock_path
-    @lock_path ||= ::File.join('/var', 'local', @new_resource.name)
+    @lock_path ||= ::File.join('/var', 'local', @name)
   end
 
   def pid_path
-    @pid_path ||= ::File.join('/var', 'local', @new_resource.name)
+    @pid_path ||= ::File.join('/var', 'local', @name)
   end
 
   def log_path
-    @log_path ||= ::File.join('/var', 'log', @new_resource.name)
+    @log_path ||= ::File.join('/var', 'log', @name)
   end
 
   def shared_unicorn_rb_path
@@ -57,7 +58,7 @@ class ProcfileHelpers
   end
 
   def environment_attributes
-    @node[@new_resource.name.to_sym].inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
+    @node[@name.to_sym].inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
   end
 
   def unicorn?(command)

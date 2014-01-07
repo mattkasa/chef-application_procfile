@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.17
+
+* Instantiate path/name/node for ProcfileHelpers in provider
+
 ## 0.3.16
 
 * Set ProcfileHelpers new_resource to @application in initialize
