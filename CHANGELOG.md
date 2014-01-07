@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.19
+
+* Try new_resource instead of @new_resource
+
 ## 0.3.18
 
 * Try setting ProcfileHelpers attributes from before_compile
