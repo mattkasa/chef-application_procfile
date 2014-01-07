@@ -17,6 +17,10 @@ class ProcfileHelpers
     @current_path ||= ::File.join(@path, 'current')
   end
 
+  def current_release
+    @current_release ||= ::File.basename(::File.realpath(self.current_path))[0,7]
+  end
+
   def shared_path
     @shared_path ||= ::File.join(@path, 'shared')
   end
