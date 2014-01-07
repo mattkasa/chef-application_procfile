@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.18
+
+* Try setting ProcfileHelpers attributes from before_compile
+
 ## 0.3.17
 
 * Instantiate path/name/node for ProcfileHelpers in provider
