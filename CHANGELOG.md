@@ -2,7 +2,11 @@
 
 This file is used to list changes made in each version of application_procfile.
 
-## 0.3.19
+## 0.3.21
+
+* Add current_release helper method
+
+## 0.3.20
 
 * Abandon instance variable pointing to ProcfileHelpers.instance
 
