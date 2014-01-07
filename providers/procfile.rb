@@ -137,8 +137,8 @@ def create_monitrc(type, number, command, options)
 end
 
 action :before_compile do
-  @helpers.path = @new_resource.application.path
-  @helpers.name = @new_resource.name
+  @helpers.path = new_resource.application.path
+  @helpers.name = new_resource.name
   @helpers.node = node
 
   unless new_resource.restart_command
