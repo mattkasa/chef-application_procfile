@@ -23,11 +23,6 @@
 
 include ApplicationCookbook::ResourceBase
 
-def initialize(*args)
-  super
-  ProcfileHelpers.instance.new_resource = @application
-end
-
 # Handle any process types
 # TODO: restrict these to only the process types in the Procfile
 def method_missing(name, *args)
