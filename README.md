@@ -25,7 +25,7 @@ include_recipe 'application_procfile'
 application 'someapp' do
   ...
   procfile do
-    web node[:someapp][:processes][:web] || 1, :reload => 'USR2', :limit => { :totalmem => '512 MB', :unhealthy => 10 }
+    web node[:someapp][:processes][:web] || 1, :reload => 'USR2', :health_check => { :path => '/system/status', :timeout => 10, :unhealthy => 10, :action => :alert }, :limit => { :totalmem => '512 MB', :unhealthy => 10 }
     worker node[:someapp][:processes][:worker] || 2, :limit => { :totalmem => '192 MB' }
   end
 end
@@ -72,6 +72,8 @@ For `:children` the value is the maximum number of child processes allowed for t
 Within `:limit` you can specify the action to be taken `:alert`, `:restart`, or `:stop` when any of the limits are exceeded.  (eg. `:limit => { :cpu => '25%', :action => :alert }`)
 
 You can also specify the number of times the limits must exceed their values before taking action using `:unhealthy`.  (eg. `:limit => { :mem => '10%', :unhealthy => 10 }`)
+
+You can specify a health check with the `:health_check` option as long as the port your service is listening on is accessible via node attribute as `node[:app][:port]` or you specify a `:port` in your health check.  (eg. `:health_check => { :port => 8080, :path => '/system/status', :timeout => 10, :unhealthy => 10, :action => :alert }`)
 
 Contributing
 ------------

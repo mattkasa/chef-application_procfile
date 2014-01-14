@@ -127,6 +127,7 @@ def create_monitrc(type, number, command, options)
       :number => (ProcfileHelpers.instance.unicorn?(command) ? 1 : number),
       :unicorn => ProcfileHelpers.instance.unicorn?(command),
       :options => options,
+      :environment_attributes => ProcfileHelpers.instance.environment_attributes,
       :pid_path => ProcfileHelpers.instance.pid_path,
       :lock_path => ProcfileHelpers.instance.lock_path
     })
