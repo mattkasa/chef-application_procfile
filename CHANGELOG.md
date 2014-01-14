@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.22
+
+* Add DSL for monit resource limits
+
 ## 0.3.21
 
 * Add current_release helper method
