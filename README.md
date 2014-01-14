@@ -25,8 +25,8 @@ include_recipe 'application_procfile'
 application 'someapp' do
   ...
   procfile do
-    web node[:someapp][:processes][:web] || 1, :reload => 'USR2'
-    worker node[:someapp][:processes][:worker] || 2
+    web node[:someapp][:processes][:web] || 1, :reload => 'USR2', :limit => { :totalmem => '512 MB', :unhealthy => 10 }
+    worker node[:someapp][:processes][:worker] || 2, :limit => { :totalmem => '192 MB' }
   end
 end
 ```
@@ -60,6 +60,18 @@ touch /var/local/someapp/web.reload
 If the process is unicorn a HUP and USR2 combination will be used automatically, with no need for the `reload` option.
 
 To properly support reloads for unicorn processes, a unicorn.rb with before_fork, correct paths and worker numbers will be installed in the shared directory and will include your `config/unicorn.rb` if you have one.
+
+You can specify resource limits with the `:limit` option, such as `:mem`, `:totalmem`, `:cpu`, `:totalcpu`, or `:children`.
+
+For `:mem` and `:totalmem` the value is the maximum allowable memory for the process or the process and all it's children, respectively, as B, KB, MB, GB, or %.  (eg. `:limit => { :totalmem => '512 MB' }`)
+
+For `:cpu`, and `:totalcpu` the value is the maxmimum allowable CPU usage for the process or the process and all it's children, respectively, as %.  (eg. `:limit => { :totalcpu => '90%' }`)
+
+For `:children` the value is the maximum number of child processes allowed for the process.  (eg. `:limit => { :children => 10 }`)
+
+Within `:limit` you can specify the action to be taken `:alert`, `:restart`, or `:stop` when any of the limits are exceeded.  (eg. `:limit => { :cpu => '25%', :action => :alert }`)
+
+You can also specify the number of times the limits must exceed their values before taking action using `:unhealthy`.  (eg. `:limit => { :mem => '10%', :unhealthy => 10 }`)
 
 Contributing
 ------------

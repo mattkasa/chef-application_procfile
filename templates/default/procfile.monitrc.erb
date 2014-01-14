@@ -10,6 +10,12 @@ check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile <%= @pid_path %>/<%= 
   start program = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
   stop program  = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> stop'"
   group <%= "#{@name}-#{@type}" %>
+  <% if @options && @options.has_key?(:limit) && @options[:limit].respond_to?(:has_key?) %>
+    <% [:mem, :totalmem, :cpu, :totalcpu, :children].each do |limit| %>
+      <% if @options[:limit].has_key?(limit) %>
+  if <%= limit.to_s %> > <%= @options[:limit][limit] %> for <%= @options[:limit].has_key?(:unhealthy) ? @options[:limit][:unhealthy].to_s : '5' %> cycles then <%= (@options[:limit].has_key?(:action) && [:alert, :restart, :stop].include?(@options[:limit][:action])) ? @options[:limit][:action].to_s : 'restart' %>
+    <% end %>
+  <% end %>
 <% end %>
 
 check file <%= "#{@name}-#{@type}" %>.restart with path <%= @lock_path %>/<%= @type %>.restart
