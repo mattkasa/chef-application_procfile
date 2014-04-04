@@ -166,10 +166,10 @@ action :before_deploy do
           if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
             app_unicorn_rb_path = $1
             command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{@helpers.shared_unicorn_rb_path}")
-            create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
+            create_unicorn_rb(@helpers, type.to_s, options[0], app_unicorn_rb_path)
           else
             command.gsub!(/(unicorn\s+)/, "\\1-c #{@helpers.shared_unicorn_rb_path} ")
-            create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
+            create_unicorn_rb(@helpers, type.to_s, options[0], app_unicorn_rb_path)
           end
         end
 
@@ -195,11 +195,11 @@ action :before_deploy do
           end
         end
 
-        create_lock_file(type.to_s, 'restart')
-        create_lock_file(type.to_s, 'reload')
-        create_environment_sh
-        create_initscript(type.to_s, command)
-        create_monitrc(type.to_s, options[0], command, options[1])
+        create_lock_file(@helpers, type.to_s, 'restart')
+        create_lock_file(@helpers, type.to_s, 'reload')
+        create_environment_sh(@helpers)
+        create_initscript(@helpers, type.to_s, command)
+        create_monitrc(@helpers, type.to_s, options[0], command, options[1])
       else
         Chef::Log.warn("Missing Procfile entry for '#{type}'")
       end
@@ -256,19 +256,19 @@ action :before_restart do
         if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
           app_unicorn_rb_path = $1
           command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{@helpers.shared_unicorn_rb_path}")
-          create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
+          create_unicorn_rb(@helpers, type.to_s, options[0], app_unicorn_rb_path)
         else
           command.gsub!(/(unicorn\s+)/, "\\1-c #{@helpers.shared_unicorn_rb_path} ")
-          create_unicorn_rb(type.to_s, options[0], app_unicorn_rb_path)
+          create_unicorn_rb(@helpers, type.to_s, options[0], app_unicorn_rb_path)
         end
       end
 
       create_lock_directory
-      create_lock_file(type.to_s, 'restart')
-      create_lock_file(type.to_s, 'reload')
-      create_environment_sh
-      create_initscript(type.to_s, command)
-      create_monitrc(type.to_s, options[0], command, options[1])
+      create_lock_file(@helpers, type.to_s, 'restart')
+      create_lock_file(@helpers, type.to_s, 'reload')
+      create_environment_sh(@helpers)
+      create_initscript(@helpers, type.to_s, command)
+      create_monitrc(@helpers, type.to_s, options[0], command, options[1])
     else
       Chef::Log.warn("Missing Procfile entry for '#{type}'")
     end
