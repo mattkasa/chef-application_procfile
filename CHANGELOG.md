@@ -2,6 +2,11 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.24
+
+* Remove singleton from ProcfileHelpers class to enable it to be used from
+  multiple application blocks in a single converge
+
 ## 0.3.23
 
 * Add DSL for monit http health check
