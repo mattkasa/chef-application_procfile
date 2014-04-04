@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.26
+
+* Pass instance of ProcfileHelpers class to create_lock_directory
+
 ## 0.3.25
 
 * Pass instance of ProcfileHelpers class to methods that need it
