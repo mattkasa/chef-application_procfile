@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.25
+
+* Pass instance of ProcfileHelpers class to methods that need it
+
 ## 0.3.24
 
 * Remove singleton from ProcfileHelpers class to enable it to be used from
