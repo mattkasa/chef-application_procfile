@@ -1,5 +1,3 @@
-require 'singleton'
-
 begin
   require 'foreman/procfile'
 rescue LoadError
@@ -7,11 +5,15 @@ rescue LoadError
 end
 
 class ProcfileHelpers
-  include Singleton
-
   attr_accessor :path
   attr_accessor :name
   attr_accessor :node
+
+  def initialize(path, name, node)
+    @path = path
+    @name = name
+    @node = node
+  end
 
   def current_path
     @current_path ||= ::File.join(@path, 'current')
@@ -62,7 +64,7 @@ class ProcfileHelpers
   end
 
   def environment_attributes
-    @node[@name.to_sym].inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
+    @environment_attributes ||= @node[@name.to_sym].inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
   end
 
   def unicorn?(command)
