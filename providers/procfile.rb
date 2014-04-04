@@ -173,7 +173,7 @@ action :before_deploy do
           end
         end
 
-        create_lock_directory
+        create_lock_directory(@helpers)
 
         # Migrate pid files from /var/run to /var/local
         ruby_block "migrate_#{type}_pid_files" do
@@ -263,7 +263,7 @@ action :before_restart do
         end
       end
 
-      create_lock_directory
+      create_lock_directory(@helpers)
       create_lock_file(@helpers, type.to_s, 'restart')
       create_lock_file(@helpers, type.to_s, 'reload')
       create_environment_sh(@helpers)
