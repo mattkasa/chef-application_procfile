@@ -111,7 +111,7 @@ end
 
 def create_monitrc(helpers, type, number, command, options)
   execute 'application_procfile_monit_reload' do
-    command '/etc/init.d/monit reload'
+    command 'monit reload'
     action :nothing
   end
 

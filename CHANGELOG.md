@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.28
+
+* Use monit to reload monitrc instead of initscript
+
 ## 0.3.27
 
 * Fix syntax error in monitrc template and handle missing node attributes
