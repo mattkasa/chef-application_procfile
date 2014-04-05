@@ -64,7 +64,7 @@ class ProcfileHelpers
   end
 
   def environment_attributes
-    @environment_attributes ||= @node[@name.to_sym].inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
+    @environment_attributes ||= (@node[@name.to_sym] || {}).inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
   end
 
   def unicorn?(command)
