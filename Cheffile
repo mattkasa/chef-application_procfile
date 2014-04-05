@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+#^syntax detection
+
+site 'http://community.opscode.com/api/v1'
+
+cookbook 'git'
+cookbook 'application'
+cookbook 'application_ruby'
+cookbook 'application_procfile', :path => './'
+cookbook 'fake', :path => 'test/fixtures/cookbooks/fake'

@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.27
+
+* Fix syntax error in monitrc template and handle missing node attributes
+
 ## 0.3.26
 
 * Pass instance of ProcfileHelpers class to create_lock_directory
