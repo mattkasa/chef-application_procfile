@@ -1,6 +1,16 @@
 #!/bin/bash
 
+# Preserve PORT if it was defined
+if [ -n "${PORT}" ]; then
+  LOCAL_PORT=${PORT}
+fi
+
 source '<%= @environment_sh_path %>'
+
+# Override PORT from environment.sh with LOCAL_PORT
+if [ -n "${LOCAL_PORT}" ]; then
+  PORT=${LOCAL_PORT}
+fi
 
 PID_FILE=${PID_FILE:-<%= @pid_path %>/<%= @type %>.pid}
 LOG_FILE=${LOG_FILE:-<%= @log_path %>/<%= @type %>.log}
