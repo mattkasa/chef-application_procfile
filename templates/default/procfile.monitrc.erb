@@ -7,7 +7,7 @@
 check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile <%= @pid_path %>/<%= @type %>-<%= i %>.pid
   depends on <%= "#{@name}-#{@type}" %>.restart
   depends on <%= "#{@name}-#{@type}" %>.reload
-  start program = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid; <%= "PORT=#{@environment_attributes['port'].to_i + i}; " if @environment_attributes.has_key?('port') %>/etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
+  start program = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid; <%= "PORT=#{@environment_attributes['PORT'].to_i + i}; " if @environment_attributes.has_key?('PORT') %>/etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
   stop program  = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> stop'" with timeout 60 seconds
   group <%= "#{@name}-#{@type}" %>
   <% if @options %>
@@ -18,8 +18,8 @@ check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile <%= @pid_path %>/<%= 
         <% end %>
       <% end %>
     <% end %>
-    <% if @options.has_key?(:health_check) && @options[:health_check].respond_to?(:has_key?) && (@options[:health_check].has_key?(:port) || @environment_attributes.has_key?('port')) %>
-  if failed port <%= @environment_attributes.has_key?('port') ? @environment_attributes['port'].to_i + i : @options[:health_check][:port].to_i + i %> protocol HTTP <%= "request \"#{@options[:health_check][:path]}\" " if @options[:health_check].has_key?(:path) %>with timeout <%= @options[:health_check].has_key?(:timeout) ? @options[:health_check][:timeout].to_s : '10' %> seconds for <%= @options[:health_check].has_key?(:unhealthy) ? @options[:health_check][:unhealthy].to_s : '5' %> cycles then <%= (@options[:health_check].has_key?(:action) && [:alert, :restart, :stop].include?(@options[:health_check][:action])) ? @options[:health_check][:action].to_s : 'restart' %>
+    <% if @options.has_key?(:health_check) && @options[:health_check].respond_to?(:has_key?) && (@options[:health_check].has_key?(:port) || @environment_attributes.has_key?('PORT')) %>
+  if failed port <%= @environment_attributes.has_key?('PORT') ? @environment_attributes['PORT'].to_i + i : @options[:health_check][:port].to_i + i %> protocol HTTP <%= "request \"#{@options[:health_check][:path]}\" " if @options[:health_check].has_key?(:path) %>with timeout <%= @options[:health_check].has_key?(:timeout) ? @options[:health_check][:timeout].to_s : '10' %> seconds for <%= @options[:health_check].has_key?(:unhealthy) ? @options[:health_check][:unhealthy].to_s : '5' %> cycles then <%= (@options[:health_check].has_key?(:action) && [:alert, :restart, :stop].include?(@options[:health_check][:action])) ? @options[:health_check][:action].to_s : 'restart' %>
     <% end %>
   <% end %>
 <% end %>
