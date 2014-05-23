@@ -15,6 +15,6 @@ application 'fake' do
   end
 
   procfile do
-    web 1
+    web 10
   end
 end
