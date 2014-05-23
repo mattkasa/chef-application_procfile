@@ -38,6 +38,12 @@ web: bundle exec unicorn -c ./config/unicorn.rb
 worker: bundle exec rake resque:work
 ```
 
+If you provide a port number via a node attribute `node[:app][:port]` then it will be incremented automatically and made available to your Procfile commands:
+
+```
+web: bundle exec thin start -p $PORT
+```
+
 Any output to stderr or stdout from your processes will be logged to files like:
 
 ```
