@@ -128,7 +128,7 @@ def create_monitrc(helpers, type, number, command, options)
       :unicorn => helpers.unicorn?(command),
       :options => options,
       :environment_attributes => helpers.environment_attributes,
-      :pid_path => helpers.pid_path,
+      :pid_prefix => ::File.join(helpers.pid_path, type),
       :lock_path => helpers.lock_path
     })
     notifies :run, 'execute[application_procfile_monit_reload]', :immediately
