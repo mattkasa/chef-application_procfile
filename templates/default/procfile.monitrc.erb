@@ -7,8 +7,8 @@
 check process <%= "#{@name}-#{@type}-#{i}" %> with pidfile <%= @pid_path %>/<%= @type %>-<%= i %>.pid
   depends on <%= "#{@name}-#{@type}" %>.restart
   depends on <%= "#{@name}-#{@type}" %>.reload
-  start program = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid; <%= "PORT=#{@environment_attributes['PORT'].to_i + i}; " if @environment_attributes.has_key?('PORT') %>/etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
-  stop program  = "/bin/bash -c 'PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> stop'" with timeout 60 seconds
+  start program = "/bin/bash -c 'env PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid <%= "PORT=#{@environment_attributes['PORT'].to_i + i} " if @environment_attributes.has_key?('PORT') %>/etc/init.d/<%= "#{@name}-#{@type}" %> start'" with timeout 60 seconds
+  stop program  = "/bin/bash -c 'env PID_FILE=<%= @pid_path %>/<%= @type %>-<%= i %>.pid /etc/init.d/<%= "#{@name}-#{@type}" %> stop'" with timeout 60 seconds
   group <%= "#{@name}-#{@type}" %>
   <% if @options %>
     <% if @options.has_key?(:limit) && @options[:limit].respond_to?(:has_key?) %>
