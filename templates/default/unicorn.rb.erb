@@ -10,11 +10,15 @@ working_directory '<%= @current_path %>'
 pid '<%= @pid_file %>'
 worker_processes <%= @workers %>
 
+app_before_exec = set[:before_exec]
 before_exec do |server|
   # Support zero-downtime deploys
   ENV['BUNDLE_GEMFILE'] = File.join(ENV['PWD'], 'Gemfile')
+
+  app_before_exec.call(server) if app_before_exec && app_before_exec.respond_to?(:call)
 end
 
+app_before_fork = set[:before_fork]
 before_fork do |server, worker|
   # Support zero-downtime deploys
   File.open('<%= @monit_pid_file %>', 'w') { |f| f.write("#{File.read(server.pid).to_i}\n") }
@@ -36,4 +40,6 @@ before_fork do |server, worker|
     end
     ENV.update(new_env)
   end
+
+  app_before_fork.call(server, worker) if app_before_fork && app_before_fork.respond_to?(:call)
 end
