@@ -1,0 +1,7 @@
+#!/bin/bash
+
+[ $USER != root ] && exec sudo $0 $@
+
+cd <%= @current_path %>
+source <%= @environment_sh_path %>
+exec bundle exec $@

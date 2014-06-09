@@ -87,6 +87,20 @@ def create_environment_sh(helpers)
   end
 end
 
+def create_wrapper_sh(helpers)
+  template ::File.join('/usr/local/bin', new_resource.name) do
+    source 'wrapper.sh.erb'
+    cookbook 'application_procfile'
+    owner 'root'
+    group 'root'
+    mode '0755'
+    variables ({
+      :current_path => helpers.current_path,
+      :environment_sh_path => helpers.environment_sh_path
+    })
+  end
+end
+
 def create_initscript(helpers, type, command)
   template 'procfile.init' do
     cookbook 'application_procfile'
@@ -240,6 +254,8 @@ action :before_restart do
     recursive true
     action :create
   end
+
+  create_wrapper_sh(@helpers)
 
   # Load application's Procfile
   pf = @helpers.procfile
