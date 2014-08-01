@@ -4,4 +4,5 @@
 
 cd <%= @current_path %>
 source <%= @environment_sh_path %>
-exec bundle exec $@
+[ -f Gemfile ] && exec bundle exec $@
+exec $@
