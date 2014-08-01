@@ -135,8 +135,9 @@ def create_monitrc(helpers, type, number, command, options)
     variables ({
       :name => new_resource.name,
       :type => type,
-      :number => (helpers.unicorn?(command) ? 1 : number),
+      :number => ((helpers.unicorn?(command) || helpers.thin?(command)) ? 1 : number),
       :unicorn => helpers.unicorn?(command),
+      :thin => helpers.thin?(command),
       :options => options,
       :environment_attributes => helpers.environment_attributes,
       :pid_prefix => ::File.join(helpers.pid_path, type),
@@ -182,6 +183,9 @@ action :before_deploy do
             command.gsub!(/(unicorn\s+)/, "\\1-c #{@helpers.shared_unicorn_rb_path} ")
             create_unicorn_rb(@helpers, type.to_s, options[0], app_unicorn_rb_path)
           end
+        elsif @helpers.thin?(command)
+          command.gsub!(/(?:-P|--pid) [^[:space:]]+[[:space:]]?/, '')
+          command.sub!(/thin[[:space:]]/, "\\0-P #{::File.join(@helpers.pid_path, "#{type}-0.pid")} ")
         end
 
         create_lock_directory(@helpers)
@@ -274,6 +278,9 @@ action :before_restart do
           command.gsub!(/(unicorn\s+)/, "\\1-c #{@helpers.shared_unicorn_rb_path} ")
           create_unicorn_rb(@helpers, type.to_s, options[0], app_unicorn_rb_path)
         end
+      elsif @helpers.thin?(command)
+        command.gsub!(/(?:-P|--pid) [^[:space:]]+[[:space:]]?/, '')
+        command.sub!(/thin[[:space:]]/, "\\0-P #{::File.join(@helpers.pid_path, "#{type}-0.pid")} ")
       end
 
       create_lock_directory(@helpers)
