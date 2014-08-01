@@ -2,6 +2,15 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.31
+
+* Check for 60 seconds to ensure process exits via SIGTERM then send SIGKILL,
+  add special behavior for thin, improvements to packaging process
+
+## 0.3.30
+
+* Preserve unicorn before_exec/before_fork callbacks, change license to Apache v2.0
+
 ## 0.3.29
 
 * Look for PORT environment variable and increment it for multiple processes

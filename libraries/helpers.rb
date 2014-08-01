@@ -70,4 +70,8 @@ class ProcfileHelpers
   def unicorn?(command)
     command.to_s.include?('unicorn')
   end
+
+  def thin?(command)
+    command.to_s.include?('thin')
+  end
 end

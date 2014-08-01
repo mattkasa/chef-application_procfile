@@ -87,6 +87,20 @@ def create_environment_sh(helpers)
   end
 end
 
+def create_wrapper_sh(helpers)
+  template ::File.join('/usr/local/bin', new_resource.name) do
+    source 'wrapper.sh.erb'
+    cookbook 'application_procfile'
+    owner 'root'
+    group 'root'
+    mode '0755'
+    variables ({
+      :current_path => helpers.current_path,
+      :environment_sh_path => helpers.environment_sh_path
+    })
+  end
+end
+
 def create_initscript(helpers, type, command)
   template 'procfile.init' do
     cookbook 'application_procfile'
@@ -121,8 +135,9 @@ def create_monitrc(helpers, type, number, command, options)
     variables ({
       :name => new_resource.name,
       :type => type,
-      :number => (helpers.unicorn?(command) ? 1 : number),
+      :number => ((helpers.unicorn?(command) || helpers.thin?(command)) ? 1 : number),
       :unicorn => helpers.unicorn?(command),
+      :thin => helpers.thin?(command),
       :options => options,
       :environment_attributes => helpers.environment_attributes,
       :pid_prefix => ::File.join(helpers.pid_path, type),
@@ -168,6 +183,9 @@ action :before_deploy do
             command.gsub!(/(unicorn\s+)/, "\\1-c #{@helpers.shared_unicorn_rb_path} ")
             create_unicorn_rb(@helpers, type.to_s, options[0], app_unicorn_rb_path)
           end
+        elsif @helpers.thin?(command)
+          command.gsub!(/(?:-P|--pid) [^[:space:]]+[[:space:]]?/, '')
+          command.sub!(/thin[[:space:]]/, "\\0-P #{::File.join(@helpers.pid_path, "#{type}-0.pid")} ")
         end
 
         create_lock_directory(@helpers)
@@ -241,6 +259,8 @@ action :before_restart do
     action :create
   end
 
+  create_wrapper_sh(@helpers)
+
   # Load application's Procfile
   pf = @helpers.procfile
   process_types = @helpers.procfile_types(pf)
@@ -258,6 +278,9 @@ action :before_restart do
           command.gsub!(/(unicorn\s+)/, "\\1-c #{@helpers.shared_unicorn_rb_path} ")
           create_unicorn_rb(@helpers, type.to_s, options[0], app_unicorn_rb_path)
         end
+      elsif @helpers.thin?(command)
+        command.gsub!(/(?:-P|--pid) [^[:space:]]+[[:space:]]?/, '')
+        command.sub!(/thin[[:space:]]/, "\\0-P #{::File.join(@helpers.pid_path, "#{type}-0.pid")} ")
       end
 
       create_lock_directory(@helpers)
