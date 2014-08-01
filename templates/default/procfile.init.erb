@@ -55,9 +55,9 @@ function stop() {
       kill -SIGTERM $pid
       if [ $? -eq 0 ]; then
         dead=0
-        for ((i=0;i<12;i++)); do
+        for ((i=0;i<6;i++)); do
           if checkpid $pid 2>&1; then
-            sleep 10
+            sleep 5
           else
             dead=1 && break
           fi
