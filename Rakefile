@@ -1,4 +1,6 @@
 require 'chef'
+require 'chef/cookbook_site_streaming_uploader'
+require 'chef/knife/cookbook_site_share'
 require 'zlib'
 require 'rake/packagetask'
 
@@ -19,8 +21,17 @@ Rake::PackageTask.new(@metadata.name, :noversion) do |p|
   p.package_files.include(Dir['**/*'].delete_if { |v| v =~ %r{(?:tmp|test|cookbooks)/?} || File.directory?(v) })
 end
 
-desc 'Build a community package'
-task :build => [:metadata, :package] do
-  cp(File.join('pkg', "#{@metadata.name}.tar.gz"), "#{@metadata.name}_#{@metadata.version}.tar.gz")
-  Rake::Task['clobber_package'].invoke
+desc 'Upload a community package'
+task :upload => [:metadata, :package] do
+  Chef::Config.from_file(File.join('.chef', 'knife.rb'))
+  supermarket = Chef::Knife::CookbookSiteShare.new
+  begin
+    supermarket.do_upload(File.join('pkg', "#{@metadata.name}.tar.gz"), 'Other', Chef::Config[:node_name], Chef::Config[:client_key])
+    puts "Uploaded #{@metadata.name} #{@metadata.version} to the Supermarket"
+  rescue => e
+    puts "Error uploading #{@metadata.name} #{@metadata.version} to the Supermarket: #{e.message}"
+    exit(1)
+  ensure
+    Rake::Task['clobber_package'].invoke
+  end
 end
