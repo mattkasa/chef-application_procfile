@@ -2,6 +2,14 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.32
+
+* Add ability to package and upload directly to the Chef Supermarket using
+  `rake upload`
+* Increase the granularity of the 30 second check
+* Use PID file as a lock for starting a new process
+* Use /dev/null for thin's PID file
+
 ## 0.3.31
 
 * Check for 60 seconds to ensure process exits via SIGTERM then send SIGKILL,
