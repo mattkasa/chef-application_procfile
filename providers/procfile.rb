@@ -185,7 +185,7 @@ action :before_deploy do
           end
         elsif @helpers.thin?(command)
           command.gsub!(/(?:-P|--pid) [^[:space:]]+[[:space:]]?/, '')
-          command.sub!(/thin[[:space:]]/, "\\0-P #{::File.join(@helpers.pid_path, "#{type}-0.pid")} ")
+          command.sub!(/thin[[:space:]]/, "\\0-P /dev/null ")
         end
 
         create_lock_directory(@helpers)
@@ -280,7 +280,7 @@ action :before_restart do
         end
       elsif @helpers.thin?(command)
         command.gsub!(/(?:-P|--pid) [^[:space:]]+[[:space:]]?/, '')
-        command.sub!(/thin[[:space:]]/, "\\0-P #{::File.join(@helpers.pid_path, "#{type}-0.pid")} ")
+        command.sub!(/thin[[:space:]]/, "\\0-P /dev/null ")
       end
 
       create_lock_directory(@helpers)
