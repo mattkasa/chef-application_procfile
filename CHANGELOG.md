@@ -2,6 +2,11 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.33
+
+* Refactor ProcfileHelpers
+* Move recipe methods to definitions
+
 ## 0.3.32
 
 * Add ability to package and upload directly to the Chef Supermarket using
