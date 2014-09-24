@@ -4,74 +4,66 @@ rescue LoadError
   Chef::Log.warn("Missing gem 'foreman'")
 end
 
-class ProcfileHelpers
-  attr_accessor :path
-  attr_accessor :name
-  attr_accessor :node
+module ProcfileHelpers
+  class << self
+    def current_path(path)
+      ::File.join(path, 'current')
+    end
 
-  def initialize(path, name, node)
-    @path = path
-    @name = name
-    @node = node
-  end
+    def current_release(path)
+      ::File.basename(::File.realpath(current_path(path)))[0,7]
+    end
 
-  def current_path
-    @current_path ||= ::File.join(@path, 'current')
-  end
+    def shared_path(path)
+      ::File.join(path, 'shared')
+    end
 
-  def current_release
-    @current_release ||= ::File.basename(::File.realpath(self.current_path))[0,7]
-  end
+    def environment_sh_path(path)
+      ::File.join(shared_path(path), 'environment.sh')
+    end
 
-  def shared_path
-    @shared_path ||= ::File.join(@path, 'shared')
-  end
+    def procfile_path(path)
+      ::File.join(current_path(path), 'Procfile')
+    end
 
-  def environment_sh_path
-    @environment_sh_path ||= ::File.join(self.shared_path, 'environment.sh')
-  end
+    def lock_path(name)
+      ::File.join('/var', 'local', name)
+    end
 
-  def procfile_path
-    @procfile_path ||= ::File.join(self.current_path, 'Procfile')
-  end
+    def pid_path(name)
+      ::File.join('/var', 'local', name)
+    end
 
-  def lock_path
-    @lock_path ||= ::File.join('/var', 'local', @name)
-  end
+    def log_path(name)
+      ::File.join('/var', 'log', name)
+    end
 
-  def pid_path
-    @pid_path ||= ::File.join('/var', 'local', @name)
-  end
+    def shared_unicorn_rb_path(path)
+      ::File.join(shared_path(path), 'unicorn.rb')
+    end
 
-  def log_path
-    @log_path ||= ::File.join('/var', 'log', @name)
-  end
+    def unicorn_rb_path(path)
+      ::File.join(current_path(path), 'config', 'unicorn.rb')
+    end
 
-  def shared_unicorn_rb_path
-    @shared_unicorn_rb_path ||= ::File.join(self.shared_path, 'unicorn.rb')
-  end
+    def procfile(path)
+      ::Foreman::Procfile.new(procfile_path(path))
+    end
 
-  def unicorn_rb_path
-    @unicorn_rb_path ||= ::File.join(self.current_path, 'config', 'unicorn.rb')
-  end
+    def procfile_types(pf)
+      [].tap { |a| pf.entries { |n,c| a << n } }
+    end
 
-  def procfile
-    ::Foreman::Procfile.new(self.procfile_path)
-  end
+    def environment_attributes(node, name)
+      (node[name.to_sym] || {}).inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
+    end
 
-  def procfile_types(pf)
-    [].tap { |a| pf.entries { |n,c| a << n } }
-  end
+    def unicorn?(command)
+      command.to_s.include?('unicorn')
+    end
 
-  def environment_attributes
-    @environment_attributes ||= (@node[@name.to_sym] || {}).inject({}) { |h, (k, v)| h[k.to_s.upcase] = v.to_s; h }
-  end
-
-  def unicorn?(command)
-    command.to_s.include?('unicorn')
-  end
-
-  def thin?(command)
-    command.to_s.include?('thin')
+    def thin?(command)
+      command.to_s.include?('thin')
+    end
   end
 end

@@ -95,7 +95,7 @@ License and Authors
 Author:: Javier Muniz <javier@granicus.com>
 Author:: Matt Kasa <mattk@granicus.com>
 
-Copyright 2013, Granicus Inc.
+Copyright 2014, Granicus Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
