@@ -3,7 +3,7 @@
 # Cookbook Name:: application_procfile
 # Recipe:: procfile
 #
-# Copyright:: 2013, Granicus Inc. <mattk@granicus.com>
+# Copyright:: 2014, Granicus Inc. <mattk@granicus.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
