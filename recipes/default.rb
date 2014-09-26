@@ -24,4 +24,13 @@ chef_gem 'foreman' do
   action :install
 end
 
-require 'foreman/procfile'
+begin
+  require 'foreman/procfile'
+rescue LoadError
+end
+
+ruby_block 'require-foreman' do
+  block do
+    require 'foreman/procfile'
+  end
+end
