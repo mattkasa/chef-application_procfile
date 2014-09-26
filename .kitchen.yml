@@ -12,6 +12,7 @@ suites:
   - name: default
     run_list:
       - recipe[fake]
+      - recipe[fakier]
     attributes: {
       fake: {
         port: "8080"
