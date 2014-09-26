@@ -5,11 +5,11 @@
 
 <% @number.times do |i| %>
 check process <%= "#{group}-#{i}" %> with pidfile <%= pid_file = "#{@pid_prefix}-#{i}.pid" %>
-  depends on <%= "#{group}" %>.restart
-  depends on <%= "#{group}" %>.reload
-  start program = "/bin/bash -c 'env PID_FILE=<%= pid_file %> <%= "PORT=#{@environment_attributes['PORT'].to_i + i} " if @environment_attributes.has_key?('PORT') %>/etc/init.d/<%= "#{group}" %> start'" with timeout 60 seconds
-  stop program  = "/bin/bash -c 'env PID_FILE=<%= pid_file %> /etc/init.d/<%= "#{group}" %> stop'" with timeout 60 seconds
-  group <%= "#{group}" %>
+  depends on <%= group %>.restart
+  depends on <%= group %>.reload
+  start program = "/bin/bash -c 'env PID_FILE=<%= pid_file %> <%= "PORT=#{@environment_attributes['PORT'].to_i + i} " if @environment_attributes.has_key?('PORT') %>/etc/init.d/<%= group %> start'" with timeout 60 seconds
+  stop program  = "/bin/bash -c 'env PID_FILE=<%= pid_file %> /etc/init.d/<%= group %> stop'" with timeout 60 seconds
+  group <%= group %>
   <% if @options %>
     <% if @options.has_key?(:limit) && @options[:limit].respond_to?(:has_key?) %>
       <% [:mem, :totalmem, :cpu, :totalcpu, :children].each do |limit| %>
@@ -24,10 +24,10 @@ check process <%= "#{group}-#{i}" %> with pidfile <%= pid_file = "#{@pid_prefix}
   <% end %>
 <% end %>
 
-check file <%= "#{group}" %>.restart with path <%= @lock_path %>/<%= @type %>.restart
+check file <%= group %>.restart with path <%= @lock_path %>/<%= @type %>.restart
   if changed timestamp then restart
 
-check file <%= "#{group}" %>.reload with path <%= @lock_path %>/<%= @type %>.reload
+check file <%= group %>.reload with path <%= @lock_path %>/<%= @type %>.reload
 <% if @unicorn %>
   if changed timestamp then exec "/bin/bash -c 'pid=$(cat <%= @pid_prefix %>-*.pid); kill -s HUP $pid; sleep 5; kill -s USR2 $pid'"
 <% elsif @options && @options.has_key?(:reload) %>

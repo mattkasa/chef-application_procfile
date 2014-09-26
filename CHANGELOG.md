@@ -2,6 +2,14 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.34
+
+* Convert to Berkshelf
+* Add ChefSpec tests
+* Add BATS tests
+* Wrap foreman compile time require in a rescue
+* Add foreman converge time require in a ruby_block
+
 ## 0.3.33
 
 * Refactor ProcfileHelpers
