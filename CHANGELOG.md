@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.37
+
+* Fix references to app_unicorn_rb_path and workers variables in procfile_unicorn_rb definition
+
 ## 0.3.36
 
 * Fix reference to type variable in procfile_unicorn_rb definition
