@@ -10,10 +10,10 @@ define :procfile_unicorn_rb, :application_name => nil, :application_path => nil,
     group 'root'
     mode '644'
     variables(
-      :app_unicorn_rb_path => app_unicorn_rb_path,
+      :app_unicorn_rb_path => params[:app_unicorn_rb_path],
       :pid_file => ::File.join(ProcfileHelpers.shared_path(params[:application_path]), 'unicorn.pid'),
       :monit_pid_file => ::File.join(ProcfileHelpers.pid_path(params[:application_name]), "#{params[:type]}-0.pid"),
-      :workers => workers,
+      :workers => params[:workers],
       :environment_sh_path => ProcfileHelpers.environment_sh_path(params[:application_path]),
       :current_path => ProcfileHelpers.current_path(params[:application_path])
     )
