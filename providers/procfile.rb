@@ -37,14 +37,21 @@ action :before_compile do
 end
 
 action :before_deploy do
-  new_resource.application.environment.update(ProcfileHelpers.environment_attributes(node, new_resource.name))
+  new_resource = @new_resource
+
+  app_name = new_resource.name
+  app_path = new_resource.application.path
+
+  Chef::Log.info("Running before_deploy in #{app_path} for #{app_name}")
+
+  new_resource.application.environment.update(ProcfileHelpers.environment_attributes(node, app_name))
   new_resource.application.sub_resources.each do |sub_resource|
-    sub_resource.environment.update(ProcfileHelpers.environment_attributes(node, new_resource.name))
+    sub_resource.environment.update(ProcfileHelpers.environment_attributes(node, app_name))
   end
 
-  if ::File.exists?(ProcfileHelpers.procfile_path(new_resource.application.path))
+  if ::File.exists?(ProcfileHelpers.procfile_path(app_path))
     # Load application's Procfile
-    pf = ProcfileHelpers.procfile(new_resource.application.path)
+    pf = ProcfileHelpers.procfile(app_path)
     process_types = ProcfileHelpers.procfile_types(pf)
 
     # Go through the process types we know about
@@ -54,19 +61,19 @@ action :before_deploy do
         if ProcfileHelpers.unicorn?(command)
           if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
             app_unicorn_rb_path = $1
-            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{ProcfileHelpers.shared_unicorn_rb_path(new_resource.application.path)}")
+            command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{ProcfileHelpers.shared_unicorn_rb_path(app_path)}")
             procfile_unicorn_rb do
-              application_name new_resource.name
-              application_path new_resource.application.path
+              application_name app_name
+              application_path app_path
               type type.to_s
               workers options[0]
               app_unicorn_rb_path app_unicorn_rb_path
             end
           else
-            command.gsub!(/(unicorn\s+)/, "\\1-c #{ProcfileHelpers.shared_unicorn_rb_path(new_resource.application.path)} ")
+            command.gsub!(/(unicorn\s+)/, "\\1-c #{ProcfileHelpers.shared_unicorn_rb_path(app_path)} ")
             procfile_unicorn_rb do
-              application_name new_resource.name
-              application_path new_resource.application.path
+              application_name app_name
+              application_path app_path
               type type.to_s
               workers options[0]
               app_unicorn_rb_path app_unicorn_rb_path
@@ -77,16 +84,16 @@ action :before_deploy do
           command.sub!(/thin[[:space:]]/, "\\0-P /dev/null ")
         end
 
-        procfile_lock_directory new_resource.name
+        procfile_lock_directory app_name
 
         # Migrate pid files from /var/run to /var/local
-        ruby_block "migrate_#{new_resource.name}-#{type}_pid_files" do
+        ruby_block "migrate_#{app_name}-#{type}_pid_files" do
           block do
             require 'fileutils'
-            old_pid_path = ::File.join('/var', 'run', new_resource.name)
+            old_pid_path = ::File.join('/var', 'run', app_name)
             if ::File.exists?(old_pid_path)
               ::Dir.glob(::File.join(old_pid_path, "#{type}*.pid")) do |pid_file|
-                ::FileUtils.mv(pid_file, ::File.join(ProcfileHelpers.pid_path(new_resource.name), ::File.basename(pid_file)))
+                ::FileUtils.mv(pid_file, ::File.join(ProcfileHelpers.pid_path(app_name), ::File.basename(pid_file)))
               end
             end
           end
@@ -94,31 +101,31 @@ action :before_deploy do
 
         # Remove old lock files
         ['restart', 'reload'].each do |suffix|
-          file ::File.join('/var', 'lock', 'subsys', new_resource.name, "#{type}.#{suffix}") do
+          file ::File.join('/var', 'lock', 'subsys', app_name, "#{type}.#{suffix}") do
             action :delete
           end
         end
 
         procfile_lock_file "#{type.to_s}.restart" do
-          application_name new_resource.name
+          application_name app_name
         end
         procfile_lock_file "#{type.to_s}.reload" do
-          application_name new_resource.name
+          application_name app_name
         end
         procfile_environment_sh do
-          application_name new_resource.name
-          application_path new_resource.application.path
+          application_name app_name
+          application_path app_path
           path_prefix new_resource.application.environment['PATH_PREFIX']
         end
         procfile_initscript do
-          application_name new_resource.name
-          application_path new_resource.application.path
+          application_name app_name
+          application_path app_path
           type type.to_s
           command command
         end
         procfile_monitrc do
-          application_name new_resource.name
-          application_path new_resource.application.path
+          application_name app_name
+          application_path app_path
           type type.to_s
           number options[0]
           command command
@@ -142,7 +149,12 @@ action :before_restart do
 
   new_resource = @new_resource
 
-  directory ProcfileHelpers.lock_path(new_resource.name) do
+  app_name = new_resource.name
+  app_path = new_resource.application.path
+
+  Chef::Log.info("Running before_restart in #{app_path} for #{app_name}")
+
+  directory ProcfileHelpers.lock_path(app_name) do
     owner 'root'
     group 'root'
     mode '0755'
@@ -150,7 +162,7 @@ action :before_restart do
     action :create
   end
 
-  directory ProcfileHelpers.pid_path(new_resource.name) do
+  directory ProcfileHelpers.pid_path(app_name) do
     owner 'root'
     group 'root'
     mode '0755'
@@ -158,7 +170,7 @@ action :before_restart do
     action :create
   end
 
-  directory ProcfileHelpers.log_path(new_resource.name) do
+  directory ProcfileHelpers.log_path(app_name) do
     owner 'root'
     group 'root'
     mode '0755'
@@ -166,20 +178,20 @@ action :before_restart do
     action :create
   end
 
-  template ::File.join('/usr/local/bin', new_resource.name) do
+  template ::File.join('/usr/local/bin', app_name) do
     source 'wrapper.sh.erb'
     cookbook 'application_procfile'
     owner 'root'
     group 'root'
     mode '0755'
     variables ({
-      :current_path => ProcfileHelpers.current_path(new_resource.application.path),
-      :environment_sh_path => ProcfileHelpers.environment_sh_path(new_resource.application.path)
+      :current_path => ProcfileHelpers.current_path(app_path),
+      :environment_sh_path => ProcfileHelpers.environment_sh_path(app_path)
     })
   end
 
   # Load application's Procfile
-  pf = ProcfileHelpers.procfile(new_resource.application.path)
+  pf = ProcfileHelpers.procfile(app_path)
   process_types = ProcfileHelpers.procfile_types(pf)
 
   # Go through the process types we know about
@@ -189,19 +201,19 @@ action :before_restart do
       if ProcfileHelpers.unicorn?(command)
         if command =~ /(?:-c|--config-file) ([^[:space:]]+)/
           app_unicorn_rb_path = $1
-          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{ProcfileHelpers.shared_unicorn_rb_path(new_resource.application.path)}")
+          command.gsub!(/(-c|--config-file) [^[:space:]]+/, "\\1 #{ProcfileHelpers.shared_unicorn_rb_path(app_path)}")
           procfile_unicorn_rb do
-            application_name new_resource.name
-            application_path new_resource.application.path
+            application_name app_name
+            application_path app_path
             type type.to_s
             workers options[0]
             app_unicorn_rb_path app_unicorn_rb_path
           end
         else
-          command.gsub!(/(unicorn\s+)/, "\\1-c #{ProcfileHelpers.shared_unicorn_rb_path(new_resource.application.path)} ")
+          command.gsub!(/(unicorn\s+)/, "\\1-c #{ProcfileHelpers.shared_unicorn_rb_path(app_path)} ")
           procfile_unicorn_rb do
-            application_name new_resource.name
-            application_path new_resource.application.path
+            application_name app_name
+            application_path app_path
             type type.to_s
             workers options[0]
             app_unicorn_rb_path app_unicorn_rb_path
@@ -212,27 +224,27 @@ action :before_restart do
         command.sub!(/thin[[:space:]]/, "\\0-P /dev/null ")
       end
 
-      procfile_lock_directory new_resource.name
+      procfile_lock_directory app_name
       procfile_lock_file "#{type.to_s}.restart" do
-        application_name new_resource.name
+        application_name app_name
       end
       procfile_lock_file "#{type.to_s}.reload" do
-        application_name new_resource.name
+        application_name app_name
       end
       procfile_environment_sh do
-        application_name new_resource.name
-        application_path new_resource.application.path
+        application_name app_name
+        application_path app_path
         path_prefix new_resource.application.environment['PATH_PREFIX']
       end
       procfile_initscript do
-        application_name new_resource.name
-        application_path new_resource.application.path
+        application_name app_name
+        application_path app_path
         type type.to_s
         command command
       end
       procfile_monitrc do
-        application_name new_resource.name
-        application_path new_resource.application.path
+        application_name app_name
+        application_path app_path
         type type.to_s
         number options[0]
         command command

@@ -2,6 +2,12 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.35
+
+* Capture new_resource variables in local variables
+* Test against older versions of application and application_ruby
+* Upgrade ffi gem for OSX users
+
 ## 0.3.34
 
 * Convert to Berkshelf
