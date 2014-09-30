@@ -18,7 +18,7 @@ define :procfile_monitrc, :application_name => nil, :application_path => nil, :t
       :thin => ProcfileHelpers.thin?(params[:command]),
       :options => params[:options],
       :environment_attributes => ProcfileHelpers.environment_attributes(node, params[:application_name]),
-      :pid_prefix => ::File.join(ProcfileHelpers.pid_path(params[:application_path]), params[:type]),
+      :pid_prefix => ::File.join(ProcfileHelpers.pid_path(params[:application_name]), params[:type]),
       :lock_path => ProcfileHelpers.lock_path(params[:application_name])
     })
     notifies :run, 'execute[application_procfile_monit_reload]', :immediately
