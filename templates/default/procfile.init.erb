@@ -29,17 +29,20 @@ function checkpid() {
 function start() {
   echo -n "Starting process $0 ..."
   if [ -s $PID_FILE ]; then
-    dead=0
-    for ((i=0;i<30;i++)); do
-      if [ -s $PID_FILE ]; then
-        sleep 1
-      else
-        dead=1 && break
+    read pid < $PID_FILE
+    if checkpid $pid 2>&1; then
+      dead=0
+      for ((i=0;i<30;i++)); do
+        if [ -s $PID_FILE ]; then
+          sleep 1
+        else
+          dead=1 && break
+        fi
+      done
+      if [ $dead -eq 0 ]; then
+        echo "[FAIL] process with PID ${pid} is using the PID file."
+        exit $STATUS_UNKNOWN
       fi
-    done
-    if [ $dead -eq 0 ]; then
-      echo "[FAIL] process with PID ${pid} is using the PID file."
-      exit $STATUS_UNKNOWN
     fi
   fi
 
