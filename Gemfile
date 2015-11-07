@@ -6,6 +6,7 @@ gem 'fauxhai'
 gem 'chefspec'
 gem 'busser-bats'
 gem 'busser-minitest'
+gem 'stove'
 gem 'test-kitchen', '~> 1.0'
 
 group :integration do
