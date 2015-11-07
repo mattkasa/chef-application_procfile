@@ -5,6 +5,7 @@ if [ -n "${PORT}" ]; then
   LOCAL_PORT=${PORT}
 fi
 
+source /etc/profile
 source '<%= @environment_sh_path %>'
 
 # Override PORT from environment.sh with LOCAL_PORT
