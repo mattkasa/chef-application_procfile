@@ -1,4 +1,6 @@
+include_recipe 'apt'
 include_recipe 'git'
+include_recipe 'rvm::system'
 include_recipe 'application_procfile'
 
 package 'sqlite3'
