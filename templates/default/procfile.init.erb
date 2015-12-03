@@ -19,7 +19,7 @@ LOG_FILE=${LOG_FILE:-<%= @log_path %>/<%= @type %>.log}
 STATUS_RUNNING=0
 STATUS_DEAD_WITH_PID=1
 STATUS_UNKNOWN=4
-PATH=${PATH}:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+PATH=${PATH_PREFIX}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 function checkpid() {
   [ -z $1 ] && return 1

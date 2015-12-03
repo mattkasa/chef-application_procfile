@@ -5,7 +5,7 @@ export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 <% if @path_prefix %>
 export PATH_PREFIX=<%= @path_prefix %>
-export PATH=<%= @path_prefix %>:${PATH}
+export PATH=${PATH_PREFIX}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 <% end %>
 <% @environment_attributes.each do |k,v| %>
 export <%= k %>='<%= v %>'
