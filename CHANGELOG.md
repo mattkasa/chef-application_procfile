@@ -2,6 +2,14 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.41
+
+* Add special behavior for thin (1 worker, SIGINT to stop)
+
+## 0.3.40
+
+* Fix PATH handling to be consistent across wrapper and initscript
+
 ## 0.3.38
 
 * Fix bug in pid_prefix
