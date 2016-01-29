@@ -65,5 +65,9 @@ module ProcfileHelpers
     def thin?(command)
       command.to_s.include?('thin')
     end
+
+    def puma?(command)
+      command.to_s.include?('puma')
+    end
   end
 end

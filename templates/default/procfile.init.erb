@@ -63,7 +63,7 @@ function stop() {
   if [ -s $PID_FILE ]; then
     read pid < $PID_FILE
     if checkpid $pid 2>&1; then
-      kill -SIGTERM $pid
+      kill -SIG<%= @puma ? 'INT' : 'TERM' %> $pid
       if [ $? -eq 0 ]; then
         dead=0
         for ((i=0;i<30;i++)); do
