@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of application_procfile.
 
+## 0.3.42
+
+* Fix bug where unicorn attempts to start when number of processes is 0
+
 ## 0.3.41
 
 * Add special behavior for thin (1 worker, SIGINT to stop)

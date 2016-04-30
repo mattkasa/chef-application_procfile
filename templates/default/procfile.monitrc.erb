@@ -3,6 +3,7 @@
 # <%= group = "#{@name}-#{@type}" %>
 # ---------------------------------------------------------------
 
+<% @number = 1 if @number > 0 && (@unicorn || @thin || @puma) %>
 <% @number.times do |i| %>
 check process <%= "#{group}-#{i}" %> with pidfile <%= pid_file = "#{@pid_prefix}-#{i}.pid" %>
   depends on <%= group %>.restart

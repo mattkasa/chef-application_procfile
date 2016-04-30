@@ -13,7 +13,7 @@ define :procfile_monitrc, :application_name => nil, :application_path => nil, :t
     variables ({
       :name => params[:application_name],
       :type => params[:type],
-      :number => ((ProcfileHelpers.unicorn?(params[:command]) || ProcfileHelpers.thin?(params[:command]) || ProcfileHelpers.puma?(params[:command])) ? 1 : params[:number]),
+      :number => params[:number],
       :unicorn => ProcfileHelpers.unicorn?(params[:command]),
       :thin => ProcfileHelpers.thin?(params[:command]),
       :puma => ProcfileHelpers.puma?(params[:command]),

@@ -17,6 +17,6 @@ application 'fakier' do
   end
 
   procfile do
-    web 1
+    web node[:fakier][:web]
   end
 end
