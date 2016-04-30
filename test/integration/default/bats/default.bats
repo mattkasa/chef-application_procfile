@@ -2,6 +2,15 @@
   which monit
 }
 
+@test "fake monit config is installed" {
+  test -f /etc/monit/conf.d/fake-web.conf
+}
+
+@test "fakier monit config is empty" {
+  run grep '^check process fakier-web-0' /etc/monit/conf.d/fakier-web.conf
+  [ "${status}" -ne 0 ]
+}
+
 @test "initscript is installed" {
   test -f /etc/init.d/fake-web
 }
