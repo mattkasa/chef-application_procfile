@@ -122,6 +122,7 @@ action :before_deploy do
           application_path app_path
           type type.to_s
           command command
+          options options[1]
         end
         procfile_monitrc do
           application_name app_name
@@ -241,6 +242,7 @@ action :before_restart do
         application_path app_path
         type type.to_s
         command command
+        options options[1]
       end
       procfile_monitrc do
         application_name app_name

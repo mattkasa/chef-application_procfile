@@ -38,3 +38,7 @@
 @test "fakier thin is running" {
   pgrep -f fakier.*thin
 }
+
+@test "fakier initscript contains the right signal" {
+  grep SIGUSR1 /etc/init.d/fakier-web
+}

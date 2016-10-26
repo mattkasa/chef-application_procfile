@@ -63,7 +63,13 @@ function stop() {
   if [ -s $PID_FILE ]; then
     read pid < $PID_FILE
     if checkpid $pid 2>&1; then
+<% if @options %>
+  <% if @options.has_key?(:stop) %>
+      kill -SIG<%= @options[:stop] %> $pid
+  <% else %>
       kill -SIG<%= @puma ? 'INT' : 'TERM' %> $pid
+  <% end %>
+<% end %>
       if [ $? -eq 0 ]; then
         dead=0
         for ((i=0;i<30;i++)); do

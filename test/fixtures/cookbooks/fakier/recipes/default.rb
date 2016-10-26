@@ -17,6 +17,6 @@ application 'fakier' do
   end
 
   procfile do
-    web node[:fakier][:web]
+    web node[:fakier][:web], :stop => 'USR1'
   end
 end

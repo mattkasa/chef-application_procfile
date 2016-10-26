@@ -26,7 +26,7 @@ application 'someapp' do
   ...
   procfile do
     web node[:someapp][:processes][:web] || 1, :reload => 'USR2', :health_check => { :path => '/system/status', :timeout => 10, :unhealthy => 10, :action => :alert }, :limit => { :totalmem => '512 MB', :unhealthy => 10 }
-    worker node[:someapp][:processes][:worker] || 2, :limit => { :totalmem => '192 MB' }
+    worker node[:someapp][:processes][:worker] || 2, :stop => 'INT', :limit => { :totalmem => '192 MB' }
   end
 end
 ```
@@ -56,6 +56,8 @@ To restart your workers:
 ```bash
 touch /var/local/someapp/worker.restart
 ```
+
+The `stop` option specifies an optional signal that can be sent to processes instead of a SIGTERM to gracefully stop them.
 
 The `reload` option specifies an optional signal that can be sent to processes to gracefully reload them by doing:
 
