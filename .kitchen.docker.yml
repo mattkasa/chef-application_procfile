@@ -1,0 +1,19 @@
+---
+driver:
+  name: docker
+  use_sudo: false
+  privileged: true
+
+platforms:
+  - name: ubuntu-12.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[fake]
+      - recipe[fakier]
+    attributes: {
+      fake: {
+        port: "8080"
+      }
+    }
